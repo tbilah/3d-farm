@@ -1,6 +1,16 @@
 import React, { Component } from 'react';
+import GoogleLogin from 'react-google-login';
 
 class Login extends Component {
+
+    onSuccess(googleUser) {
+        console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+    }
+
+    onFailure(response) {
+        console.log(response);
+    }
+
     render() {
         return (
             <div className="Login">
@@ -24,7 +34,15 @@ class Login extends Component {
                             <button class="btn btn-primary" type="submit">
                                 Sign in
                             </button>
+                            <GoogleLogin
+                                clientId="368488107530-funna3ndjd772vt26d9ri20lt3om1p30.apps.googleusercontent.com"
+                                onSuccess={this.onSuccess}
+                                onFailure={this.onFailure}
+                                className="btn btn-primary"
+                                style={{marginLeft:10}}
+                            />
                         </div>
+                        
                     </form>
                 </div>
             </div>
