@@ -6,7 +6,7 @@ app.get('/', function (req, res) {
   res.send('Je suis le service d\'impression!');
 });
 
-app.get('/imprimer', imprimer);
+app.post('/imprimer', imprimer);
 
 app.listen(3000, function () {
   console.log('Le service d\'impression est en cours de servir la porte 3000!');
