@@ -1,10 +1,7 @@
 {
     "server": {
         "domain": "http://localhost",
-        "port": {
-            "magasin": 3000,
-            "service-impression": 3008
-        },
+        "port": 3000,
         "db": {
             "user": "admin",
             "password": "dm0MURwEXcjOLToi"
