@@ -1,10 +1,10 @@
 const http = require('http');
-const config = require('./config.json');
+const config = require('../config.json');
 const app = require('./app');
 
-const port = config.server.port;
+const port = config.server.port.magasin;
 const server = http.createServer(app);
 
-console.log("Server started on port 3008");
+console.log("Server started on port " + port);
 
 server.listen(port);
