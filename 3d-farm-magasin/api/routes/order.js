@@ -1,9 +1,9 @@
 const router = express.Router();
 const Order = require('../models/order');
-const Event = require('../models/event');
 const Printer = require('../models/printer');
 const Staff = require('../models/staff');
-const Messenger = require('../../Messenger');
+const agent = require('superagent');
+const config = require('../../config.json');
 
 /**
  * Validate if staff exists and has enough money
@@ -66,7 +66,16 @@ function validate(req) {
 function follow(order) {
     // Call messenger service and register
     // Post to "domain:MessengerPort/register"
-    return new Promise.resolve(order);
+    return agent.post(config.messenger + "/register")
+        .send({
+            follower: order.requester,
+            order: order._id
+        })
+        .then(res => {
+            console.log(order.requester + " successfully follows " + order._id);
+        }, err => {
+            throw new Error(order.requester + " cannot follow " + order._id + "." + err)
+        });
 }
 
 /**
@@ -74,10 +83,16 @@ function follow(order) {
  * @param {*} order 
  * @returns {Promise}
  */
-function addToPrintingQueue(order) {
+function queue(order) {
     // Get the thread of printer and add the order to queue
-    // Post to "domain:ThreadManagerPort/:printerId"
-    return new Promise.resolve(order);
+    // Post to "domain:ThreadManagerPort"
+    return agent.post(config.threadManager)
+        .send({ order: order })
+        .then(res => {
+            console.log(order._id + " successfully queues in " + order.printer);
+        }, err => {
+            throw new Error(order._id + " cannot queues in " + order.printer + "." + err);
+        });
 }
 
 /**
@@ -101,8 +116,7 @@ function createNewOrder(req) {
 router.post("/", (req, res) => {
     validate(req)
         .then(createNewOrder)
-        .then(follow)
-        .then(addToPrintingQueue)
+        .then(order => Promise.all([follow(order), queue(order)]))
         .catch(err => {
             console.error(err);
             res.status(500).json({

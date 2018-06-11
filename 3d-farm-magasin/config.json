@@ -7,6 +7,8 @@
             "password": "dm0MURwEXcjOLToi"
         }
     },
+    "messenger": "http://localhost:3008",
+    "threadManager": "http://localhost:3010",
     "states": {
         "staff": ["MEMBER", "LEADER", "ADMIN"],
         "printer": ["AVAILABLE", "PRINTING", "DOWN"],
