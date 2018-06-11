@@ -152,7 +152,7 @@ router.get("/", (req, res) => {
     .select("_id requester printer model history state")
     .exec()
     .then(orders => {
-        if (Array.isArray(orders)) {
+        if (Array.isArray(orders) && orders.length > 0) {
             res.status(200).json(orders.map(o => {
                 o.request = {
                     type: "GET",
