@@ -144,6 +144,29 @@ router.get("/:orderId", (req, res) => {
         }
     })
     .catch(console.error);
-})
+});
+
+// Get all requests
+router.get("/", (req, res) => {
+    Order.find()
+    .select("_id requester printer model history state")
+    .exec()
+    .then(orders => {
+        if (Array.isArray(orders)) {
+            res.status(200).json(orders.map(o => {
+                o.request = {
+                    type: "GET",
+                    url: config.server.domain + ":" + config.server.port + "/order/" + order._id
+                }
+                return o;
+            }));
+        } else {
+            res.status(404).json({
+                message: "No order found"
+            });
+        }
+    })
+    .catch(console.error);
+});
 
 module.exports = router;
