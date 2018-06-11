@@ -1,9 +1,9 @@
 const router = express.Router();
-const Order = require('../models/order');
-const Printer = require('../models/printer');
-const Staff = require('../models/staff');
-const agent = require('superagent');
-const config = require('../../config.json');
+const Order = require("../models/order");
+const Printer = require("../models/printer");
+const Staff = require("../models/staff");
+const agent = require("superagent");
+const config = require("../../config.json");
 
 /**
  * Validate if staff exists and has enough money
@@ -12,12 +12,12 @@ const config = require('../../config.json');
  */
 function validateStaff(req) {
     Staff.findOne(req.body.requester)
-        .select('_id')
+        .select("_id")
         .exec()
         .then(staff => {
             // Check existence
             if (!staff) {
-                throw new Error('No such staff');
+                throw new Error("No such staff");
             }
             // TODO Check money
             // For instance, welp, return true
@@ -31,16 +31,16 @@ function validateStaff(req) {
  */
 function validatePrinter(req) {
     Printer.findOne(req.body.printer)
-        .select('_id state specs')
+        .select("_id state specs")
         .exec()
         .then(printer => {
             // Check existence
             if (!printer) {
-                throw new Error('No such printer');
+                throw new Error("No such printer");
             }
             // Check state
-            if (printer.state === 'DOWN') {
-                throw new Error('Printer ' + printer._id + ' is not available');
+            if (printer.state === "DOWN") {
+                throw new Error("Printer " + printer._id + " is not available");
             }
             // TODO Check if object fits in
             // For instance, welp, return true
@@ -59,7 +59,7 @@ function validate(req) {
 }
 
 /**
- * Add requester to command's followers
+ * Add requester to command"s followers
  * @param {*} order 
  * @returns {Promise}
  */
@@ -124,5 +124,26 @@ router.post("/", (req, res) => {
             });
         });
 });
+
+// Observe the request
+router.get("/:orderId", (req, res) => {
+    Order.findById(req.params.orderId).exec()
+    .then(order => {
+        if (!order) {
+            res.status(404).json({
+                message: "No such order"
+            });
+        } else {
+            res.status(200).json({
+                order: order,
+                request: {
+                    type: "GET",
+                    url: config.server.domain + ":" + config.server.port + "/order/" + order._id
+                }
+            })
+        }
+    })
+    .catch(console.error);
+})
 
 module.exports = router;
