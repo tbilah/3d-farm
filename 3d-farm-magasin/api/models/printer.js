@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const printerStates = require('../../config.json').states.printer;
 
 const printerSpecsSchema = mongoose.Schema({
     layerResolution: Number, // In microns
@@ -37,7 +38,11 @@ const printerSchema = mongoose.Schema({
     price: Number,
     specs: printerSpecsSchema,
     material: materialSchema,
-    cameras: [cameraSchema]
+    cameras: [cameraSchema],
+    state: {
+        enum: printerStates,
+        required: true
+    }
 });
 
 module.exports = mongoose.model('Printer', printerSchema);

@@ -6,5 +6,8 @@
             "user": "admin",
             "password": "dm0MURwEXcjOLToi"
         }
+    },
+    "states": {
+        "printer": ["AVAILABLE", "PRINTING", "DOWN"]
     }
 }
