@@ -25,6 +25,16 @@ const orderSchema = mongoose.Schema({
         default: config.states.order[0],
         required: true
     },
+    requester: {
+        // Who give this order
+        type: String,
+        required: true
+    },
+    printer: {
+        // Who will print this
+        type: String,
+        required: true
+    },
     model: {
         // Base64 of input model
         type: Buffer,
