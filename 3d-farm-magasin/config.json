@@ -8,6 +8,7 @@
         }
     },
     "states": {
-        "printer": ["AVAILABLE", "PRINTING", "DOWN"]
+        "printer": ["AVAILABLE", "PRINTING", "DOWN"],
+        "order": ["WAITING", "BEING_PRINTED", "PAUSED", "CANCELED", "DONE"]
     }
 }
