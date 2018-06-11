@@ -7,10 +7,11 @@ const Messenger = require('../../Messenger');
 
 /**
  * Validate if staff exists and has enough money
- * @param {*} order 
+ * @param {*} req 
+ * @returns {Promise} 
  */
-function validateStaff(order) {
-    Staff.findOne(order.requester)
+function validateStaff(req) {
+    Staff.findOne(req.body.requester)
         .select('_id')
         .exec()
         .then(staff => {
@@ -25,10 +26,11 @@ function validateStaff(order) {
 
 /**
  * Validate if printer exists and can print the object
- * @param {*} order 
+ * @param {*} req 
+ * @returns {Promise} 
  */
-function validatePrinter(order) {
-    Printer.findOne(order.printer)
+function validatePrinter(req) {
+    Printer.findOne(req.body.printer)
         .select('_id state specs')
         .exec()
         .then(printer => {
@@ -46,18 +48,20 @@ function validatePrinter(order) {
 }
 
 /**
- * Validate the order
- * @param {*} order 
+ * Validate the request
+ * @param {*} req request sent from UI
+ * @returns {Promise} 
  */
-function validate(order) {
-    return Promise.all([validateStaff(order), validatePrinter(order)])
+function validate(req) {
+    return Promise.all([validateStaff(req), validatePrinter(req)])
         // If all checks pass, we return the order to the next function
-        .then(_ => order);
+        .then(_ => req);
 }
 
 /**
  * Add requester to command's followers
  * @param {*} order 
+ * @returns {Promise}
  */
 function follow(order) {
     // Call messenger service and register
@@ -68,6 +72,7 @@ function follow(order) {
 /**
  * Add the order to queue of printer
  * @param {*} order 
+ * @returns {Promise}
  */
 function addToPrintingQueue(order) {
     // Get the thread of printer and add the order to queue
@@ -78,17 +83,24 @@ function addToPrintingQueue(order) {
 /**
  * Extract the order from request
  * @param {*} req request sent from UI, in json
+ * @returns {Promise}
  */
-function getOrderFrom(req) {
-    return Order.findOne(req.body.id)
-        .select('_id requester printer model history')
-        .exec();
+function createNewOrder(req) {
+    return Order.create({
+        requester: req.body.requester,
+        printer: req.body.printer,
+        model: req.body.model
+    })
+        .then(order => {
+            console.log(order);
+            return order;
+        });
 }
 
-// Run a request
+// Create a request
 router.post("/", (req, res) => {
-    getOrderFrom(req)
-        .then(validate)
+    validate(req)
+        .then(createNewOrder)
         .then(follow)
         .then(addToPrintingQueue)
         .catch(err => {
