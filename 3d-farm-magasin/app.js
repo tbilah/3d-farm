@@ -13,6 +13,7 @@ const mongoose = require('mongoose');
 
 const staffRoutes = require('./api/routes/staff');
 const printerRoutes = require('./api/routes/printers');
+const impressionRoutes = require('./api/routes/impression');
 
 mongoose.connect(
     'mongodb+srv://' + config.server.db.user + ':' + config.server.db.password + '@3d-farm-cluster-hl6rg.mongodb.net/test?retryWrites=true',
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
 
 app.use('/staff', staffRoutes);
 app.use('/printers', printerRoutes);
+app.use('/impression', impressionRoutes);
 
 app.use((req, res, next) => {
     const error = new Error('Ressource not found !');
