@@ -1,22 +1,7 @@
 const mongoose = require('mongoose');
 const config = require('../../config.json');
+const eventSchema = require('./event');
 
-const eventSchema = mongoose.Schema({
-    date: {
-        type: Date,
-        required: true,
-        default: Date.now()
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    emittorId: {
-        // Who causes this event
-        type: String,
-        required: true
-    }
-});
 const orderSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     state: {
