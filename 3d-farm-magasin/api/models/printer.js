@@ -23,7 +23,6 @@ const materialSchema = mongoose.Schema({
     },
     quantity: {
         type: Number,
-        required: true,
         min: 0,
         default: 100
     }
@@ -44,7 +43,6 @@ const printerSchema = mongoose.Schema({
         type: String,
         enum: printerStates,
         default: printerStates[0],
-        required: true
     }
 });
 

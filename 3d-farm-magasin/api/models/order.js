@@ -8,7 +8,6 @@ const orderSchema = mongoose.Schema({
         type: String,
         enum: config.states.order,
         default: config.states.order[0],
-        required: true
     },
     requester: {
         // Who give this order
