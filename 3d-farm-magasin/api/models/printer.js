@@ -24,7 +24,8 @@ const materialSchema = mongoose.Schema({
     quantity: {
         type: Number,
         required: true,
-        min: 0
+        min: 0,
+        default: 100
     }
 });
 
@@ -40,7 +41,9 @@ const printerSchema = mongoose.Schema({
     material: materialSchema,
     cameras: [cameraSchema],
     state: {
+        type: String,
         enum: printerStates,
+        default: printerStates[0],
         required: true
     }
 });
