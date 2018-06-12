@@ -14,8 +14,8 @@ const staffSchema = mongoose.Schema({
     phone: String,
     type: {
         type: String,
-        enum: config.staff,
-        default: config.staff[0],
+        enum: config.states.staff,
+        default: config.states.staff[0],
         required: true
     },
     departement: {
