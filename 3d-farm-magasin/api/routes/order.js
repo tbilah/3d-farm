@@ -87,8 +87,8 @@ function follow(order) {
  */
 function queue(order) {
     // Get the thread of printer and add the order to queue
-    // Post to "domain:ThreadManagerPort"
-    return agent.post(config.threadManager)
+    // Post to "domain:printingServerPort"
+    return agent.post(config.printingServer.domain + ":" + config.printingServer.port)
         .send(order)
         .then(_ => {
             console.log(order._id + " successfully queues in " + order.printer);

@@ -1,8 +1,10 @@
 const express = require('express');
-const config = require('./config.json');
+const config = require('../config.json');
 const app = express();
 const logger = require('morgan');
 const bodyParser = require('body-parser');
+const Manager = require('./ThreadManager');
+const printery = new Manager();
 
 // We dont use mongoose to store processus memory for instance
 app.use(logger('dev'));
@@ -22,4 +24,8 @@ app.use((req, res, next) => {
         return res.status(200).json({});
     }
     next();
+});
+
+app.listen(config.printingServer.port, _ => {
+    console.log("Printing server is on " + config.printingServer.domain + ":" + config.printingServer.port);
 });
