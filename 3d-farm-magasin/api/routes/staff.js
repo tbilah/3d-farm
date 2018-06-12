@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 router.get('/', (req, res, next) => {
     Staff.find()
-        .select('_id name email phone type departement')
+        .select(config.staff.visibleFields)
         .exec()
         .then(users => {
             const response = {
@@ -48,7 +48,7 @@ router.get('/:id', (req, res, next) => {
                 res.status(200).json(user)
             } else {
                 res.status(404).json({
-                    message: 'There is no user with the provided email'
+                    message: 'There is no user with the provided id'
                 });
             }
         })
@@ -133,7 +133,8 @@ router.delete('/:id', (req, res, next) => {
         .exec()
         .then(result => {
             res.status(200).json({
-                message: 'User deleted'
+                message: 'User deleted successfully',
+
             })
         })
         .catch(err => {
