@@ -1,20 +1,67 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+const Printer = require('../models/printer');
+const config = require('../../config');
 
-router.get('/', (req, res, next) => {
-    res.status(200).json({
-        message: 'Returning the list of printers (not yet implemented)'
+router.get('/', (req, res) => {
+    Printer.find().exec()
+    .then(printers => {
+        if (Array.isArray(printers) && printers.length > 0) {
+            res.status(200).json({
+                message: 'List of printers',
+                printers: printers.map(p => {
+                    p.request = {
+                        type: "GET",
+                        url: config.server.domain + ":" + config.server.port + "/printers/" + p._id
+                    };
+                    return p;
+                })
+            });
+        } else {
+            res.status(404).json({
+                message: "No printer found"
+            })
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({
+            message: "Internal error. " + err
+        });
     });
 });
 
 // 3d printing specs description: http://3dinsider.com/3d-printer-specs-what-do-they-mean/
-router.post('/', (req, res, next) => {
-    const printer = {
-        id: req.body.id,
+router.post('/', (req, res) => {
+    Printer.create({
+        _id: mongoose.Types.ObjectId(),
         brand: req.body.brand,
         specs: req.body.specs,
-        price: req.body.price
-    };
+        price: req.body.price,
+        cameras: [{
+            _id: mongoose.Types.ObjectId()
+        }]
+    })
+    .then(printer => {
+        if (printer) {
+            res.status(201).json({
+                message: "Printer added!",
+                printer: printer
+            });
+        } else {
+            res.status(500).json({
+                message: "Cannot add new printer."
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({
+            message: "Internal error",
+            error: err
+        });
+    });
     /**
     specs: {
         layerResolution: req.body.layerResolution,
@@ -31,23 +78,43 @@ router.post('/', (req, res, next) => {
         firmware: req.body.firmware
     }
      */
-    res.status(201).json({
-        message: 'Printer added!',
-        printer: printer
+});
+
+router.get('/:printerId', (req, res) => {
+    Printer.findById(req.param.printerId).exec()
+    .then(printer => {
+        if (printer) {
+            res.status(201).json({
+                message: "Printer details!",
+                printer: printer
+            });
+        } else {
+            res.status(404).json({
+                message: "Printer not found"
+            });
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({
+            message: "Internal error",
+            error: err
+        });
     });
 });
 
-router.get('/:printerId', (req, res, next) => {
-    res.status(201).json({
-        message: 'Printer details !',
-        id: req.params.printerId
-    });
-});
-
-router.delete('/:printerId', (req, res, next) => {
-    res.status(200).json({
-        message: 'Printer deleted !',
-        id: req.params.printerId
+router.delete('/:printerId', (req, res) => {
+    Printer.findByIdAndRemove(req.param.printerId).exec()
+    .then(result => {
+        res.status(200).json({
+            message: "Printer deleted!"
+        });
+    })
+    .catch(err => {
+        console.error(err);
+        res.status(500).json({
+            error: err
+        });
     });
 });
 

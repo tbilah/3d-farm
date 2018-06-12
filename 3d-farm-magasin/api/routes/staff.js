@@ -4,9 +4,11 @@ const Staff = require('../models/staff');
 const router = express.Router();
 const mongoose = require('mongoose');
 
+const visibleFields = '_id name email phone type departement';
+
 router.get('/', (req, res, next) => {
     Staff.find()
-        .select(config.staff.visibleFields)
+        .select(visibleFields)
         .exec()
         .then(users => {
             const response = {
@@ -40,7 +42,7 @@ router.get('/:id', (req, res, next) => {
     Staff.findOne({
             _id: req.params.id
         })
-        .select('_id name email phone type departement')
+        .select(visibleFields)
         .exec()
         .then(user => {
             console.log(user);

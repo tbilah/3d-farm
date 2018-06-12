@@ -1,13 +1,23 @@
 {
     "server": {
         "domain": "http://localhost",
-        "port": 3001,
+        "port": 3000,
         "db": {
             "user": "admin",
             "password": "dm0MURwEXcjOLToi"
         }
     },
-    "staff": {
-        "visibleFields": "_id name email phone type departement"
+    "messenger": {
+        "domain": "http://localhost",
+        "port": 3008
+    },
+    "printingServer": {
+        "domain": "http://localhost",
+        "port": 3010
+    },
+    "states": {
+        "staff": ["MEMBER", "LEADER", "ADMIN"],
+        "printer": ["AVAILABLE", "PRINTING", "DOWN"],
+        "order": ["WAITING", "BEING_PRINTED", "PAUSED", "CANCELED", "DONE"]
     }
 }

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const config = require('../../config.json');
 
 const staffSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -13,6 +14,8 @@ const staffSchema = mongoose.Schema({
     phone: String,
     type: {
         type: String,
+        enum: config.states.staff,
+        default: config.states.staff[0],
         required: true
     },
     departement: {
@@ -26,7 +29,7 @@ const staffSchema = mongoose.Schema({
     "name": "Abdelilah KHLIL",
     "email": "khlil.abdelilah@gmail.com",
     "phone": "0782823308",
-    "type": "chef",
+    "type": "CHEF",
     "departement": "toy departement"
 }
  */
