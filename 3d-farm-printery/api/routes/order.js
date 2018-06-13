@@ -6,9 +6,10 @@ const Printer = require("../models/printer");
 const Staff = require("../models/staff");
 const agent = require("superagent");
 const config = require("../../config.json");
-const FarmError = require("../../errors/FarmError");
-const CustomErrors = require("../../errors/CustomErrors");
+const FarmError = require("../errors/FarmError");
+const CustomErrors = require("../errors/CustomErrors");
 const notificationURL = config.notification.domain + ":" + config.notification.port;
+const printeryURL = config.printery.domain + ":" + config.printery.port;
 
 /**
  * Validate if staff exists and has enough money
@@ -62,39 +63,47 @@ function validatePrinter(req, res) {
 /**
  * Notify requester, leader of department and operators
  * @param {*} order 
+ * @param {Object} event 
+ * @param {String} event.emittorId
+ * @param {String} event.description
+ * @param {Date} event.date
  * @returns {Promise}
  */
-function notifyAllConcerningPeople(order) {
+function notifyAllConcerningPeople(order, event) {
     return getConcerningPeople(order)
         .then(peoples =>
             agent.post(notificationURL)
                 .send({
-                    bc: peoples, // Their ids
+                    dest: peoples, // Their ids
                     order: order,
-                    message: "Order has been created"
+                    event: event
                 })
                 .then(_ => {
-                    console.log(order._id + " has been notified to requester, his/her leader and operators");
+                    console.log("Event notified", event);
                     return order;
                 }));
 }
 
 function getConcerningPeople(order) {
-    return Promise.all([getOperators(), getDepartmentLeader(order)])
-        .then(peoples => peoples[0].concat(peoples[1]));
+    return Promise.all([getOperators(), getDepartementLeader(order)])
+        .then(people => {
+            people = people[0].concat(people[1]).map(p => p._id);
+            console.log("Concerning people: ", people);
+            return people;
+        });
 }
 
-function getDepartmentLeader(order) {
-    return Staff.findById(order.requester).select("departmenet").exec()
-        .then(dept =>
+function getDepartementLeader(order) {
+    return Staff.findById(order.requester).select("departement").exec()
+        .then(requester =>
             Staff.find({
                 type: "LEADER",
-                departement: dept
+                departement: requester.departement
             }).select("_id").exec());
 }
 
 function getOperators() {
-    return Staff.find({ type: "OPERATOR" }).exec();
+    return Staff.find({ type: "OPERATOR" }).select("_id").exec();
 }
 
 /**
@@ -111,8 +120,40 @@ function createNewOrder(req, res) {
         model: req.body.model
     })
         .then(order => {
-            console.log(order);
+            console.log("New order created:", order);
             return order;
+        });
+}
+
+/**
+ * Add an event to history of order
+ * @param {Object} event 
+ * @param {String} event.emittorId
+ * @param {String} event.description
+ * @param {Date} event.date
+ * @returns {Promise} order and event
+ */
+function updateHistory(event, order) {
+    return Order.findById(order._id).select("state requester printer model history").exec()
+        .then(order => {
+            if (!order) {
+                throw new Error("Order not found");
+            }
+            // Validation
+            if (!Array.isArray(order.history)) order.history = [];
+            if (!event.emittorId) throw new Error("Invalid emittor id");
+            if (!event.description) throw new Error("Invalid description");
+            if (!event.date) event.date = Date.now();
+            if (!event.date instanceof Date) throw new Error("Invalid date");
+            order.history.push(event);
+            return order;
+        })
+        .then(function (order) {
+            return order.save();
+        })
+        .then(order => {
+            console.log("History updated:" + order);
+            return {order, event};
         });
 }
 
@@ -120,7 +161,12 @@ function createNewOrder(req, res) {
 router.post("/", (req, res) => {
     Promise.all([validateStaff(req, res), validatePrinter(req, res)])
         .then(_ => createNewOrder(req, res))
-        .then(notifyAllConcerningPeople)
+        .then(order => updateHistory({
+            emittorId: order.requester,
+            description: "Order created",
+            date: Date.now()
+        }, order))
+        .then(_ => notifyAllConcerningPeople(_.order, _.event))
         .then(order => res.status(201).json({
             message: "Order has been created",
             order: order
@@ -144,7 +190,7 @@ router.get("/:orderId", (req, res) => {
             } else {
                 order.request = {
                     type: "GET",
-                    url: config.server.domain + ":" + config.server.port + "/order/" + order._id
+                    url: printeryURL + "/order/" + order._id
                 };
                 res.status(200).json(order);
             }
@@ -166,12 +212,12 @@ router.get("/", (req, res) => {
         .exec()
         .then(orders => {
             if (Array.isArray(orders) && orders.length > 0) {
-                res.status(200).json(orders.map(o => {
-                    o.request = {
+                res.status(200).json(orders.map(order => {
+                    order.request = {
                         type: "GET",
-                        url: config.server.domain + ":" + config.server.port + "/order/" + order._id
+                        url: printeryURL + "/order/" + order._id
                     }
-                    return o;
+                    return order;
                 }));
             } else {
                 throw new CustomErrors.InexistingOrderError();
