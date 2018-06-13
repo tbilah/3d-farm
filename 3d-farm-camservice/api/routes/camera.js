@@ -21,6 +21,7 @@ router.get('/', (req, res, next) => {
                     return {
                         _id: cam._id,
                         reference: cam.reference,
+                        deactivated: cam.deactivated,
                         requests: {
                             get: requestsTemplate.get.replace(/\$ID/, cam._id),
                             delete: requestsTemplate.delete.replace(/\$ID/, cam._id)
@@ -55,6 +56,7 @@ router.get('/:id', (req, res, next) => {
                         res.status(200).json({
                             id: cam._id,
                             reference: cam.reference,
+                            deactivated: cam.deactivated,
                             pictures: pics
                         });
                     })
@@ -62,6 +64,7 @@ router.get('/:id', (req, res, next) => {
                         res.status(200).json({
                             id: cam._id,
                             reference: cam.reference,
+                            deactivated: cam.deactivated,
                             pictures: err.message
                         });
                     });
