@@ -17,7 +17,7 @@ router.get('/', (req, res, next) => {
         .then(pictures => {
             const response = {
                 count: pictures.length,
-                cameras: pictures.map(pic => {
+                pictures: pictures.map(pic => {
                     return {
                         _id: pic._id,
                         cameraId: pic.cameraId,
@@ -83,8 +83,8 @@ router.post('/', (req, res, next) => {
                     _id: picture._id,
                     reference: picture.reference,
                     requests: {
-                        get: requestsTemplate.get.replace(/\$ID/, pic._id),
-                        delete: requestsTemplate.delete.replace(/\$ID/, pic._id)
+                        get: requestsTemplate.get.replace(/\$ID/, picture._id),
+                        delete: requestsTemplate.delete.replace(/\$ID/, picture._id)
                     }
                 }
             });
