@@ -43,14 +43,12 @@ router.get('/:id', (req, res, next) => {
     Camera.findOne({
             _id: req.params.id
         })
-        .select('_id reference')
         .exec()
         .then(cam => {
             if (cam) {
                 Picture.find({
                         cameraId: cam._id
                     })
-                    .select('_id timestamp')
                     .exec()
                     .then(pics => {
                         res.status(200).json({
@@ -92,6 +90,7 @@ router.post('/', (req, res, next) => {
                 camera: {
                     _id: cam._id,
                     reference: cam.reference,
+                    deactivated: cam.deactivated,
                     requests: {
                         get: requestsTemplate.get.replace(/\$ID/, cam._id),
                         delete: requestsTemplate.delete.replace(/\$ID/, cam._id)
@@ -104,6 +103,41 @@ router.post('/', (req, res, next) => {
                 error: err
             })
         });
+});
+
+router.patch('/:id', (req, res, next) => {
+    const id = req.params.id;
+    const updateOps = {};
+    for (const ops of req.body) {
+        updateOps[ops.propName] = ops.value;
+    }
+    console.log(updateOps);
+    Camera.findOneAndUpdate({
+            _id: id
+        }, {
+            $set: updateOps
+        })
+        .exec()
+        .then(cam => {
+            res.status(200).json({
+                message: "Camera updated",
+                camera: {
+                    _id: cam._id,
+                    reference: cam.reference,
+                    deactivated: cam.deactivated,
+                    requests: {
+                        get: requestsTemplate.get.replace(/\$ID/, cam._id),
+                        delete: requestsTemplate.delete.replace(/\$ID/, cam._id)
+                    }
+                }
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+
 });
 
 router.delete("/:id", (req, res, next) => {
