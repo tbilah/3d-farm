@@ -33,6 +33,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/uploads', express.static('uploads/'));
 app.use('/cameras', cameraRoutes);
 app.use('/pictures', pictureRoutes);
 app.get("/", (req, res, next) => res.status(200).json({
