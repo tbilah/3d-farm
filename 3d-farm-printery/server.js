@@ -3,9 +3,13 @@ const config = require('./config.json');
 const app = express();
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const Manager = require('./ThreadManager');
-const printery = new Manager();
-printery._init().catch(console.error);
+const mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb+srv://' + config.db.user + ':' + config.db.password + '@3d-farm-cluster-hl6rg.mongodb.net/test?retryWrites=true')
+    .catch(err => {
+        console.error(err);
+        process.exit(err.code);
+    });
 
 // We dont use mongoose to store processus memory for instance
 app.use(logger('dev'));
@@ -27,11 +31,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/", (req, res) => {
-    printery.queue(req.body)
-        .then(msg => res.status(200).json({ message: "Queued successfully" }))
-        .catch(err => res.status(err.status).json(err));
-});
+app.use("/order", require("./api/routes/order"));
 
 app.listen(config.printery.port, _ => {
     console.log("Printing server is on " + config.printery.domain + ":" + config.printery.port);

@@ -8,6 +8,7 @@ const agent = require("superagent");
 const config = require("../../config.json");
 const FarmError = require("../../errors/FarmError");
 const CustomErrors = require("../../errors/CustomErrors");
+const messengerURL = config.messenger.domain + ":" + config.messenger.port;
 
 /**
  * Validate if staff exists and has enough money
@@ -59,44 +60,41 @@ function validatePrinter(req, res) {
 }
 
 /**
- * Add requester to command"s followers
+ * Notify requester, leader of department and operators
  * @param {*} order 
  * @returns {Promise}
  */
-function follow(order) {
-    // Call messenger service and register
-    // Post to "domain:MessengerPort/register"
-    return agent.post(config.messenger.domain + ":" + config.messenger.port + "/register")
-        .send({
-            follower: order.requester,
-            order: order._id
-        })
-        .then(_ => {
-            console.log(order.requester + " successfully follows " + order._id);
-            return order;
-        })
-        .catch(err => {
-            throw new CustomErrors.UnfollowableError(order.requester, order, err);
-        });
+function notifyAllConcerningPeople(order) {
+    return getConcerningPeople(order)
+        .then(peoples =>
+            agent.post(messengerURL)
+                .send({
+                    bc: peoples, // Their ids
+                    order: order,
+                    message: "Order has been created"
+                })
+                .then(_ => {
+                    console.log(order._id + " has been notified to requester, his/her leader and operators");
+                    return order;
+                }));
 }
 
-/**
- * Add the order to queue of printer
- * @param {*} order 
- * @returns {Promise}
- */
-function queue(order) {
-    // Get the thread of printer and add the order to queue
-    // Post to "domain:printeryPort"
-    return agent.post(config.printery.domain + ":" + config.printery.port)
-        .send(order)
-        .then(_ => {
-            console.log(order._id + " successfully queues in " + order.printer);
-            return order;
-        })
-        .catch(err => {
-            throw new CustomErrors.UnqueueableError(order, err);
-        });
+function getConcerningPeople(order) {
+    return Promise.all([getOperators(), getDepartmentLeader(order)])
+        .then(peoples => peoples[0].concat(peoples[1]));
+}
+
+function getDepartmentLeader(order) {
+    return Staff.findById(order.requester).select("departmenet").exec()
+        .then(dept =>
+            Staff.find({
+                type: "LEADER",
+                departement: dept
+            }).select("_id").exec());
+}
+
+function getOperators() {
+    return Staff.find({ type: "OPERATOR" }).exec();
 }
 
 /**
@@ -122,10 +120,9 @@ function createNewOrder(req, res) {
 router.post("/", (req, res) => {
     Promise.all([validateStaff(req, res), validatePrinter(req, res)])
         .then(_ => createNewOrder(req, res))
-        .then(follow)
-        .then(queue)
+        .then(notifyAllConcerningPeople)
         .then(order => res.status(201).json({
-            message: "Order created",
+            message: "Order has been created",
             order: order
         }))
         .catch(err => {
