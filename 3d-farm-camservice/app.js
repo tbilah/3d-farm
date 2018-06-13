@@ -35,6 +35,9 @@ app.use((req, res, next) => {
 
 app.use('/cameras', cameraRoutes);
 app.use('/pictures', pictureRoutes);
+app.get("/", (req, res, next) => res.status(200).json({
+    message: "This is the 3D Farm web service for camera management"
+}));
 
 app.use((req, res, next) => {
     const error = new Error('Ressource not found !');
