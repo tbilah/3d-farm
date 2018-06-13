@@ -1,4 +1,4 @@
-const Printer = require('../api/models/printer');
+const Printer = require('./api/models/printer');
 const Thread = require('./Thread');
 
 class ThreadManager {
