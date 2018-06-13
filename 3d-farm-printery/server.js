@@ -26,6 +26,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.listen(config.printingServer.port, _ => {
-    console.log("Printing server is on " + config.printingServer.domain + ":" + config.printingServer.port);
+app.listen(config.printery.port, _ => {
+    console.log("Printing server is on " + config.printery.domain + ":" + config.printery.port);
 });

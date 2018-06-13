@@ -66,7 +66,7 @@ function validatePrinter(req, res) {
 function follow(order) {
     // Call messenger service and register
     // Post to "domain:MessengerPort/register"
-    return agent.post(config.messenger + "/register")
+    return agent.post(config.messenger.domain + ":" + config.messenger.port + "/register")
         .send({
             follower: order.requester,
             order: order._id
@@ -87,8 +87,8 @@ function follow(order) {
  */
 function queue(order) {
     // Get the thread of printer and add the order to queue
-    // Post to "domain:printingServerPort"
-    return agent.post(config.printingServer.domain + ":" + config.printingServer.port)
+    // Post to "domain:printeryPort"
+    return agent.post(config.printery.domain + ":" + config.printery.port)
         .send(order)
         .then(_ => {
             console.log(order._id + " successfully queues in " + order.printer);
