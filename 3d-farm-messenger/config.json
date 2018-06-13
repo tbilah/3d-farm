@@ -1,0 +1,23 @@
+{
+    "magasin": {
+        "domain": "http://localhost",
+        "port": 3000,
+        "db": {
+            "user": "admin",
+            "password": "dm0MURwEXcjOLToi"
+        }
+    },
+    "messenger": {
+        "domain": "http://localhost",
+        "port": 3008
+    },
+    "printery": {
+        "domain": "http://localhost",
+        "port": 3010
+    },
+    "states": {
+        "staff": ["MEMBER", "LEADER", "ADMIN"],
+        "printer": ["AVAILABLE", "PRINTING", "DOWN"],
+        "order": ["WAITING", "BEING_PRINTED", "PAUSED", "CANCELED", "DONE"]
+    }
+}
