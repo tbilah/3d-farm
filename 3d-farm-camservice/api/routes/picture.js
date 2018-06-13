@@ -2,6 +2,34 @@ const express = require('express');
 const config = require('../../config');
 const router = express.Router();
 const mongoose = require('mongoose');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './uploads/');
+    },
+    filename: (req, file, cb) => {
+        console.log(file);
+        cb(null, new Date().toISOString() + file.originalname.match(/\.[^.]*$/));
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+        cb(null, true);
+    } else {
+        cb(new Error('The format of your file is not supported by the server, make sure you are sending an image file.'),
+            false);
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 1024 * 1024 * 5,
+    },
+    fileFilter: fileFilter
+});
 
 const Picture = require('../models/picture');
 const Camera = require('../models/camera');
@@ -17,11 +45,12 @@ router.get('/', (req, res, next) => {
         .then(pictures => {
             const response = {
                 count: pictures.length,
-                cameras: pictures.map(pic => {
+                pictures: pictures.map(pic => {
                     return {
                         _id: pic._id,
                         cameraId: pic.cameraId,
                         timestamp: pic.timestamp,
+                        image: pic.image,
                         requests: {
                             get: requestsTemplate.get.replace(/\$ID/, pic._id),
                             delete: requestsTemplate.delete.replace(/\$ID/, pic._id)
@@ -43,11 +72,18 @@ router.get('/:id', (req, res, next) => {
     Picture.findOne({
             _id: req.params.id
         })
-        .select('_id cameraId timestamp')
         .exec()
         .then(pic => {
             if (pic) {
-                res.status(200).json(pic)
+                res.status(200).json({
+                    id: pic._id,
+                    cameraId: pic.cameraId,
+                    timestamp: pic.timestamp,
+                    image: pic.image,
+                    requests: {
+                        delete: requestsTemplate.delete.replace(/\$ID/, pic._id)
+                    }
+                });
             } else {
                 res.status(404).json({
                     message: 'There is no picture with the provided id'
@@ -61,7 +97,8 @@ router.get('/:id', (req, res, next) => {
         });
 });
 
-router.post('/', (req, res, next) => {
+router.post('/', upload.single('image'), (req, res, next) => {
+    console.log(req.file);
     Camera.findOne({
             _id: req.body.cameraId
         })
@@ -75,6 +112,7 @@ router.post('/', (req, res, next) => {
                 _id: mongoose.Types.ObjectId(),
                 cameraId: camera._id,
                 timestamp: req.body.timestamp,
+                image: req.file.path
             })
             picture.save();
             return res.status(201).json({
@@ -83,8 +121,8 @@ router.post('/', (req, res, next) => {
                     _id: picture._id,
                     reference: picture.reference,
                     requests: {
-                        get: requestsTemplate.get.replace(/\$ID/, pic._id),
-                        delete: requestsTemplate.delete.replace(/\$ID/, pic._id)
+                        get: requestsTemplate.get.replace(/\$ID/, picture._id),
+                        delete: requestsTemplate.delete.replace(/\$ID/, picture._id)
                     }
                 }
             });

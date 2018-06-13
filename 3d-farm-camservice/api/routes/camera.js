@@ -1,8 +1,10 @@
 const express = require('express');
 const config = require('../../config');
-const Camera = require('../models/camera');
 const router = express.Router();
 const mongoose = require('mongoose');
+
+const Camera = require('../models/camera');
+const Picture = require('../models/picture');
 
 const requestsTemplate = {
     get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/cameras/$ID",
@@ -44,7 +46,25 @@ router.get('/:id', (req, res, next) => {
         .exec()
         .then(cam => {
             if (cam) {
-                res.status(200).json(cam)
+                Picture.find({
+                        cameraId: cam._id
+                    })
+                    .select('_id timestamp')
+                    .exec()
+                    .then(pics => {
+                        res.status(200).json({
+                            id: cam._id,
+                            reference: cam.reference,
+                            pictures: pics
+                        });
+                    })
+                    .catch(err => {
+                        res.status(200).json({
+                            id: cam._id,
+                            reference: cam.reference,
+                            pictures: err.message
+                        });
+                    });
             } else {
                 res.status(404).json({
                     message: 'There is no camera with the provided id'
