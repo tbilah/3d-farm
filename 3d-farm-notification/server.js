@@ -24,6 +24,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.listen(config.messenger.port, _ => {
-    console.log("Messenger server is on " + config.messenger.domain + ":" + config.messenger.port);
+app.listen(config.notification.port, _ => {
+    console.log("Notification server is on " + config.notification.domain + ":" + config.notification.port);
 });

@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "all": "concurrently --names \"CAM,MAGASIN,MESSENGER,PRINTERY\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold\" \"nodemon 3d-farm-camservice/server.js\" \"nodemon 3d-farm-magasin/server.js\" \"nodemon 3d-farm-messenger/server.js\" \"nodemon 3d-farm-printery/server.js\""
+    "all": "concurrently --names \"CAM,MAGASIN,NOTIFCIATION,PRINTERY\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold\" \"nodemon 3d-farm-camservice/server.js\" \"nodemon 3d-farm-magasin/server.js\" \"nodemon 3d-farm-notification/server.js\" \"nodemon 3d-farm-printery/server.js\""
   },
   "repository": {
     "type": "git",

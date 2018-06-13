@@ -7,7 +7,7 @@
         "domain": "http://localhost",
         "port": 3000
     },
-    "messenger": {
+    "notification": {
         "domain": "http://localhost",
         "port": 3008
     },

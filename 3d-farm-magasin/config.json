@@ -7,7 +7,7 @@
             "password": "dm0MURwEXcjOLToi"
         }
     },
-    "messenger": {
+    "notification": {
         "domain": "http://localhost",
         "port": 3008
     },

@@ -8,7 +8,7 @@ const agent = require("superagent");
 const config = require("../../config.json");
 const FarmError = require("../../errors/FarmError");
 const CustomErrors = require("../../errors/CustomErrors");
-const messengerURL = config.messenger.domain + ":" + config.messenger.port;
+const notificationURL = config.notification.domain + ":" + config.notification.port;
 
 /**
  * Validate if staff exists and has enough money
@@ -67,7 +67,7 @@ function validatePrinter(req, res) {
 function notifyAllConcerningPeople(order) {
     return getConcerningPeople(order)
         .then(peoples =>
-            agent.post(messengerURL)
+            agent.post(notificationURL)
                 .send({
                     bc: peoples, // Their ids
                     order: order,
