@@ -44,20 +44,22 @@ app.use('/staff', staffRoutes);
 app.use('/printers', printerRoutes);
 app.use('/order', impressionRoutes);
 
-app.get("/", (req, res) => res.status(200).json({ message: "Hello, this is the storage of 3D Farm." }));
+app.get("/", (req, res) => res.status(200).json({
+    message: "Hello, this is the storage of 3D Farm."
+}));
 
-// app.use((req, res, next) => {
-//     const error = new Error('Ressource not found !');
-//     error.status = 404;
-//     next(error);
-// });
+app.use((req, res, next) => {
+    const error = new Error('Ressource not found !');
+    error.status = 404;
+    next(error);
+});
 
-// app.use((error, req, res, next) => {
-//     res.status(error.status || 500).json({
-//         error: {
-//             message: error.message
-//         }
-//     });
-// });
+app.use((error, req, res, next) => {
+    res.status(error.status || 500).json({
+        error: {
+            message: error.message
+        }
+    });
+});
 
 module.exports = app;
