@@ -103,6 +103,28 @@ router.post('/', (req, res, next) => {
         });
 });
 
-
+router.delete("/:id", (req, res, next) => {
+    const id = req.params.id;
+    Camera.findOneAndRemove({
+            _id: id
+        })
+        .exec()
+        .then(cam => {
+            if (!cam) {
+                return res.status(404).json({
+                    message: 'Camera was not found',
+                });
+            }
+            res.status(200).json({
+                message: 'Camera deleted successfully',
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json({
+                error: err
+            });
+        });
+})
 
 module.exports = router;
