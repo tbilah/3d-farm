@@ -133,10 +133,14 @@ router.delete('/:id', (req, res, next) => {
             _id: id
         })
         .exec()
-        .then(result => {
+        .then(user => {
+            if (!user) {
+                return res.status(404).json({
+                    message: 'User was not found'
+                });
+            }
             res.status(200).json({
                 message: 'User deleted successfully',
-
             })
         })
         .catch(err => {

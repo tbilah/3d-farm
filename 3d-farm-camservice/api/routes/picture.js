@@ -103,10 +103,16 @@ router.delete('/:id', (req, res, next) => {
             _id: id
         })
         .exec()
-        .then(result => {
+        .then(pic => {
+            if (!pic) {
+                return res.status(404).json({
+                    message: 'Picture was not found',
+                });
+
+            }
             res.status(200).json({
                 message: 'Picture deleted successfully',
-            })
+            });
         })
         .catch(err => {
             console.log(err);
