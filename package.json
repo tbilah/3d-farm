@@ -1,0 +1,25 @@
+{
+  "name": "3d-farm",
+  "version": "1.0.0",
+  "description": "Ceci est un projet de LO10, pour but de montrer l'interaction entre les services.",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "all": "concurrently --names \"CAM,MAGASIN,MESSENGER,PRINTERY\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold\" \"nodemon 3d-farm-camservice/server.js\" \"nodemon 3d-farm-magasin/server.js\" \"nodemon 3d-farm-messenger/server.js\" \"nodemon 3d-farm-printery/server.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tbilah/3d-farm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tbilah/3d-farm/issues"
+  },
+  "homepage": "https://github.com/tbilah/3d-farm#readme",
+  "devDependencies": {
+    "concurrently": "^3.5.1",
+    "nodemon": "^1.17.5"
+  }
+}
