@@ -5,6 +5,7 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 const Manager = require('./ThreadManager');
 const printery = new Manager();
+printery._init().catch(console.error);
 
 // We dont use mongoose to store processus memory for instance
 app.use(logger('dev'));
@@ -24,6 +25,12 @@ app.use((req, res, next) => {
         return res.status(200).json({});
     }
     next();
+});
+
+app.get("/", (req, res) => {
+    printery.queue(req.body)
+        .then(msg => res.status(200).json({ message: "Queued successfully" }))
+        .catch(err => res.status(err.status).json(err));
 });
 
 app.listen(config.printery.port, _ => {
