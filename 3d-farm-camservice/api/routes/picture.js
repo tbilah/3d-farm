@@ -7,7 +7,8 @@ const Picture = require('../models/picture');
 const Camera = require('../models/camera');
 
 const requestsTemplate = {
-    get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/pictures/$ID"
+    get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/pictures/$ID",
+    delete: "curl -X DELETE " + config.server.domain + ":" + config.server.port + "/pictures/$ID"
 }
 
 router.get('/', (req, res, next) => {
@@ -22,7 +23,8 @@ router.get('/', (req, res, next) => {
                         cameraId: pic.cameraId,
                         timestamp: pic.timestamp,
                         requests: {
-                            get: requestsTemplate.get.replace(/\$ID/, pic._id)
+                            get: requestsTemplate.get.replace(/\$ID/, pic._id),
+                            delete: requestsTemplate.delete.replace(/\$ID/, pic._id)
                         }
                     }
                 })
@@ -81,7 +83,8 @@ router.post('/', (req, res, next) => {
                     _id: picture._id,
                     reference: picture.reference,
                     requests: {
-                        get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/pictures/" + picture._id
+                        get: requestsTemplate.get.replace(/\$ID/, pic._id),
+                        delete: requestsTemplate.delete.replace(/\$ID/, pic._id)
                     }
                 }
             });

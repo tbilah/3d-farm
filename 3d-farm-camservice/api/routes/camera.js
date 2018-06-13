@@ -4,6 +4,11 @@ const Camera = require('../models/camera');
 const router = express.Router();
 const mongoose = require('mongoose');
 
+const requestsTemplate = {
+    get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/cameras/$ID",
+    delete: "curl -X DELETE " + config.server.domain + ":" + config.server.port + "/cameras/$ID"
+}
+
 router.get('/', (req, res, next) => {
     Camera.find()
         .exec()
@@ -15,7 +20,8 @@ router.get('/', (req, res, next) => {
                         _id: cam._id,
                         reference: cam.reference,
                         requests: {
-                            get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/cameras/" + cam._id
+                            get: requestsTemplate.get.replace(/\$ID/, cam._id),
+                            delete: requestsTemplate.delete.replace(/\$ID/, cam._id)
                         }
                     }
                 })
@@ -64,7 +70,8 @@ router.post('/', (req, res, next) => {
                     _id: cam._id,
                     reference: cam.reference,
                     requests: {
-                        get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/cameras/" + cam._id
+                        get: requestsTemplate.get.replace(/\$ID/, cam._id),
+                        delete: requestsTemplate.delete.replace(/\$ID/, cam._id)
                     }
                 }
             });
