@@ -1,11 +1,11 @@
 {
+    "db": {
+        "user": "admin",
+        "password": "dm0MURwEXcjOLToi"
+    },
     "magasin": {
         "domain": "http://localhost",
-        "port": 3000,
-        "db": {
-            "user": "admin",
-            "password": "dm0MURwEXcjOLToi"
-        }
+        "port": 3000
     },
     "notification": {
         "domain": "http://localhost",
