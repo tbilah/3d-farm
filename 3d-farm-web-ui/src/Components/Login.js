@@ -1,15 +1,28 @@
 import React, { Component } from 'react';
 import GoogleLogin from 'react-google-login';
+import {
+  BrowserRouter as Router,
+  Route,
+  withRouter
+} from 'react-router-dom';
+import Home from './Home';
 
 class Login extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+        redirect: false,
+        user: null
+      };
     }
 
     onSuccess(googleUser) {
-        console.log("bonjour");
-        console.log(googleUser);
-        this.props.setUser(googleUser);
+        this.props.history.push({
+            pathname : '/home',
+            state : {
+                user : googleUser
+            }
+        });
     }
 
     onFailure(response) {
@@ -35,9 +48,14 @@ class Login extends Component {
                         </div>   
                     </form>
                 </div>
+                <Router>
+                    <div>
+                        <Route exact path="/home" render={() => <Home user={this.state.googleUser} />} />
+                    </div> 
+                </Router>
             </div>
         );
     }
 }
 
-export default Login;
+export default withRouter(Login);
