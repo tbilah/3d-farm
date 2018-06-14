@@ -6,7 +6,10 @@ const config = require("../../config.json");
 const gmailConfig = require("../../gmail.json");
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 const printeryURL = config.printery.domain + ":" + config.printery.port;
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+const nexmoConfig = require("../../nexmo.json");
+const Nexmo = require("nexmo");
+const nexmo = new Nexmo(nexmoConfig, { debug: true });
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Only for dev server
 const gmailSender = require("gmail-send")({
     user: gmailConfig.user,
     pass: gmailConfig.pass,
@@ -23,6 +26,21 @@ function asyncGmailSender(options) {
             }
         });
     });
+}
+
+function asyncSMSSender(from, to, text) {
+    return new Promise((resolve, reject) =>
+        nexmo.message.sendSms(
+            from, to, text, {},
+            (err, resData) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(resData);
+                }
+            }
+        )
+    );
 }
 
 function sendMail(dest, event, order) {
@@ -43,14 +61,25 @@ function HTMLfrom(event, order) {
         + "<p>Emitter detail: <a href='" + emitterURL + "'>" + event.emitter.name + "</a></p>";
 }
 
+function toInter(FRphone) {
+    if (FRphone.startsWith("0")) {
+        return "33" + FRphone.slice(1);
+    } else
+        return FRphone;
+}
+
 function sendSMS(dest, event, order) {
-    // TODO
-    return Promise.resolve(SMSTextfrom(event, order));
+    let msg = SMSTextfrom(event, order);
+    return Promise.all(dest.map(person => asyncSMSSender("3DFarmNotification", toInter(person.phone), msg)));
 }
 
 function SMSTextfrom(event, order) {
-    // TODO
-    return "Not implemented SMS sender yet";
+    let orderURL = printeryURL + "/order/" + order._id;
+    let emitterURL = magasinURL + "/staff/" + event.emittorId;
+    let msg = event.description + ". By " + event.emitter.name
+        + ". Date: " + event.date.toLocaleString("en-GB");
+    console.log(msg);
+    return msg;
 }
 
 function getMailAndPhones(destIds, emittorId) {
