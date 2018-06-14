@@ -1,3 +1,15 @@
-Ceci est un projet de LO10, pour but de montrer l'interaction entre les services.
+This is a project of LO10 to demonstrate how we call and create API of web services.
 
-Le projet compose de plusieur micro services, chacun se situe dans un dossier séparé.
+This module is composed of 5 submodules:
+* Camera service
+* Magasin
+* Notification center
+* Printery
+* Web UI
+
+### How to run
+````bash
+npm install // Install dependencies of global module
+npm run all:install // Install dependencies of submodules
+npm run all:start // Start all submodules
+````

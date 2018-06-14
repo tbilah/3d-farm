@@ -5,7 +5,8 @@
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "all": "concurrently --names \"CAM,MAGASIN,NOTIFCIATION,PRINTERY\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold\" \"nodemon 3d-farm-camservice/server.js\" \"nodemon 3d-farm-magasin/server.js\" \"nodemon 3d-farm-notification/server.js\" \"nodemon 3d-farm-printery/server.js\""
+    "all:start": "concurrently --names \"CA,MA,NO,PR,UI\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold,bgCyan.bold\" \"cd 3d-farm-camservice && npm start\" \"cd 3d-farm-magasin && npm start\" \"cd 3d-farm-notification && npm start\" \"cd 3d-farm-printery && npm start\" \"cd 3d-farm-web-ui && npm start\"",
+    "all:install": "concurrently --names \"CA,MA,NO,PR,UI\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold,bgCyan.bold\" \"cd 3d-farm-camservice && npm install\" \"cd 3d-farm-magasin && npm install\" \"cd 3d-farm-notification && npm install\" \"cd 3d-farm-printery && npm install\" \"cd 3d-farm-web-ui && npm install\""
   },
   "repository": {
     "type": "git",
@@ -19,7 +20,6 @@
   },
   "homepage": "https://github.com/tbilah/3d-farm#readme",
   "devDependencies": {
-    "concurrently": "^3.5.1",
-    "nodemon": "^1.17.5"
+    "concurrently": "^3.5.1"
   }
 }
