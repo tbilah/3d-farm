@@ -13,18 +13,23 @@ const gmailSender = require("gmail-send")({
     subject: gmailConfig.subject
 });
 
+function asyncGmailSender(options) {
+    return new Promise((resolve, reject) => {
+        gmailSender(options, (err, res) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(res);
+            }
+        });
+    });
+}
+
 function sendMail(dest, event, order) {
     // The emitter is in event
-    gmailSender({
+    return asyncGmailSender({
         to: dest.map(d => d.email),
         html: HTMLfrom(event, order)
-    }, (err, res) => {
-        if (err) {
-            console.error(err);
-            throw err;
-        } else {
-            console.log(res);
-        }
     });
 }
 
@@ -45,7 +50,7 @@ function sendSMS(dest, event, order) {
 
 function SMSTextfrom(event, order) {
     // TODO
-    return;
+    return "Not implemented SMS sender yet";
 }
 
 function getMailAndPhones(destIds, emittorId) {
@@ -124,8 +129,8 @@ router.post("/", (req, res) => {
                 console.error(err);
                 res.status(400).json(err);
             })
-        .then(_ => {
-            console.log("Event notified");
+        .then(r => {
+            console.log("Event notified", r);
             res.status(200).json({
                 message: "Event notified"
             });
