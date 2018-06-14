@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Login from './Login'
-import User from './User'
 import Home from './Home'
 import {
     BrowserRouter as Router,
@@ -13,8 +12,8 @@ class App extends Component {
         return (
             <Router >
                 <Switch>
-                    <Route exact path='/' component={Home} />
-                    <Route path='/login' component={Login} />
+                    <Route exact path='/' component={Login} />
+                    <Route path='/home' component={Home} />
                 </Switch>
             </Router>
         );

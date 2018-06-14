@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
+import Navbar from './Navbar';
 
 class Home extends Component {
     render() {
         return (
             <div>
-                <h1>Welcome</h1>
+            	{console.log(this.props.history.location.state.user)}
+            	<Navbar user={this.props.history.location.state.user} />
             </div>
         );
     }
