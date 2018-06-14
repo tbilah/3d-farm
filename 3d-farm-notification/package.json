@@ -13,8 +13,11 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.3",
+    "gmail-send": "^1.2.14",
+    "gmail-sender-oauth": "^1.0.5",
     "mongoose": "^5.1.5",
     "morgan": "^1.9.0",
+    "nodemailer": "^4.6.6",
     "superagent": "^3.8.3"
   },
   "devDependencies": {

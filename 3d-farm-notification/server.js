@@ -1,6 +1,6 @@
 const express = require('express');
-const config = require('./config.json');
 const app = express();
+const config = require('./config.json');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 
@@ -23,6 +23,8 @@ app.use((req, res, next) => {
     }
     next();
 });
+
+app.use("/", require("./api/routes/post"));
 
 app.listen(config.notification.port, _ => {
     console.log("Notification server is on " + config.notification.domain + ":" + config.notification.port);

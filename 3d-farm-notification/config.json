@@ -16,8 +16,22 @@
         "port": 3010
     },
     "states": {
-        "staff": ["MEMBER", "LEADER", "ADMIN"],
-        "printer": ["AVAILABLE", "PRINTING", "DOWN"],
-        "order": ["WAITING", "BEING_PRINTED", "PAUSED", "CANCELED", "DONE"]
+        "staff": [
+            "MEMBER",
+            "LEADER",
+            "ADMIN"
+        ],
+        "printer": [
+            "AVAILABLE",
+            "PRINTING",
+            "DOWN"
+        ],
+        "order": [
+            "WAITING",
+            "BEING_PRINTED",
+            "PAUSED",
+            "CANCELED",
+            "DONE"
+        ]
     }
 }
