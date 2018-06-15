@@ -1,7 +1,7 @@
 class FarmError extends Error {
-    constructor() {
-        super();
-        this.status = 500;
+    constructor(message, status) {
+        super(message);
+        this.status = status || 500;
     }
 }
 

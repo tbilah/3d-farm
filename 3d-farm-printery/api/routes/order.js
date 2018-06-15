@@ -128,30 +128,80 @@ function createNewOrder(req) {
  * @param {String} event.emittorId
  * @param {String} event.description
  * @param {Date} event.date
+ * @param {String?} event.orderNewState
+ * @param {Order} order
  * @returns {Promise} order and event
  */
 function updateHistory(event, order) {
     return Order.findById(order._id).select("state requester printer model history").exec()
         .then(order => {
             if (!order) {
-                throw new Error("Order not found");
+                throw new CustomErrors.InexistingOrderError();
             }
             // Validation
             if (!Array.isArray(order.history)) order.history = [];
-            if (!event.emittorId) throw new Error("Invalid emittor id");
-            if (!event.description) throw new Error("Invalid description");
+            if (!event.emittorId) throw new FarmError("Invalid emittor id", 400);
+            if (!event.description) throw new FarmError("Invalid description", 400);
             if (!event.date) event.date = Date.now();
-            if (!event.date instanceof Date) throw new Error("Invalid date");
+            if (!event.date instanceof Date) throw new FarmError("Invalid date", 400);
             order.history.push(event);
-            return order;
-        })
-        .then(function (order) {
+            if (!event.orderNewState) event.orderNewState = "WAITING";
+            if (config.states.order.indexOf(event.orderNewState) < 0) throw new FarmError("Unknown order state to set", 400);
+            order.state = event.orderNewState;
             return order.save();
         })
         .then(order => {
-            console.log("History updated:" + order);
-            return {order, event};
+            console.log("History updated on " + order._id);
+            return { order, event };
         });
+}
+
+function getOrder(id) {
+    return Order.findById(id).exec()
+        .then(order => {
+            if (!order) {
+                throw new CustomErrors.InexistingOrderError();
+            } else {
+                return order;
+            }
+        });
+}
+
+function getEvent(req) {
+    let event = {};
+    if (!req.body.emittorId || mongoose.Types.ObjectId.isValid(req.body.emittorId)) throw new FarmError("Invalid emitter id", 400);
+    event.emittorId = req.body.emittorId;
+    event.date = new Date(req.body.date);
+    if (typeof req.body.action !== "string" || config.actions.indexOf(req.body.action.toUpperCase()) < 0)
+        throw new FarmError("Action must be in " + config.actions, 400);
+    let action = req.body.action.toUpperCase();
+    switch (action) {
+        case "ACCEPT":
+            event.description = "Order accepted";
+            event.orderNewState = "BEING_PRINTED";
+            break;
+        case "UNACCEPT":
+            event.description = "Order unaccepted";
+            event.orderNewState = "WAITING";
+            break;
+        case "PAUSE":
+            event.description = "Order paused";
+            event.orderNewState = "PAUSED";
+            break;
+        case "CANCEL":
+            event.description = "Order canceled";
+            event.orderNewState = "CANCELED";
+            break;
+        case "FINISH":
+            event.description = "Order finished";
+            event.orderNewState = "DONE";
+            break;
+        default:
+            event.description = "Unknow action taken";
+            event.orderNewState = "WAITING";
+            break;
+    }
+    return event;
 }
 
 // Create a request
@@ -180,17 +230,13 @@ router.post("/", (req, res) => {
 
 // Observe the request
 router.get("/:orderId", (req, res) => {
-    Order.findById(req.params.orderId).exec()
+    getOrder(req.params.orderId)
         .then(order => {
-            if (!order) {
-                throw new CustomErrors.InexistingOrderError();
-            } else {
-                order.request = {
-                    type: "GET",
-                    url: printeryURL + "/order/" + order._id
-                };
-                res.status(200).json(order);
-            }
+            order.request = {
+                type: "GET",
+                url: printeryURL + "/order/" + order._id
+            };
+            res.status(200).json(order);
         })
         .catch(err => {
             console.error(err);
@@ -198,6 +244,22 @@ router.get("/:orderId", (req, res) => {
                 res.status(err.status).json(err);
             } else {
                 res.status(500).json(err);
+            }
+        });
+});
+
+// Take action on request
+router.post("/:orderId", (req, res) => {
+    Promise.all([getEvent(req), getOrder(req.params.orderId)])
+        .then(_ => updateHistory(_[0], _[1]))
+        .then(_ => notifyAllConcerningPeople(_.order, _.event))
+        .then(order => res.status(200).json({ order }))
+        .catch(err => {
+            console.error(err);
+            if (err instanceof FarmError) {
+                return res.status(err.status).json(err);
+            } else {
+                return res.status(500).json(err);
             }
         });
 });
