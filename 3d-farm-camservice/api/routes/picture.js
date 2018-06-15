@@ -1,5 +1,5 @@
 const express = require('express');
-const config = require('../../config');
+const config = require('../../../config');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -35,8 +35,8 @@ const Picture = require('../models/picture');
 const Camera = require('../models/camera');
 
 const requestsTemplate = {
-    get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/pictures/$ID",
-    delete: "curl -X DELETE " + config.server.domain + ":" + config.server.port + "/pictures/$ID"
+    get: "curl -X GET " + config.cam.domain + ":" + config.cam.port + "/pictures/$ID",
+    delete: "curl -X DELETE " + config.cam.domain + ":" + config.cam.port + "/pictures/$ID"
 }
 
 router.get('/', (req, res, next) => {

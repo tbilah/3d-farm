@@ -1,5 +1,5 @@
 const express = require('express');
-const config = require('../../config');
+const config = require('../../../config.json');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -7,8 +7,8 @@ const Camera = require('../models/camera');
 const Picture = require('../models/picture');
 
 const requestsTemplate = {
-    get: "curl -X GET " + config.server.domain + ":" + config.server.port + "/cameras/$ID",
-    delete: "curl -X DELETE " + config.server.domain + ":" + config.server.port + "/cameras/$ID"
+    get: "curl -X GET " + config.cam.domain + ":" + config.cam.port + "/cameras/$ID",
+    delete: "curl -X DELETE " + config.cam.domain + ":" + config.cam.port + "/cameras/$ID"
 }
 
 router.get('/', (req, res, next) => {
