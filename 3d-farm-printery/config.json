@@ -24,7 +24,6 @@
         ],
         "printer": [
             "AVAILABLE",
-            "PRINTING",
             "DOWN"
         ],
         "order": [
