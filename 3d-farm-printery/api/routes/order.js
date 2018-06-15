@@ -14,10 +14,9 @@ const printeryURL = config.printery.domain + ":" + config.printery.port;
 /**
  * Validate if staff exists and has enough money
  * @param {*} req 
- * @param {*} res
  * @returns {Promise} 
  */
-function validateStaff(req, res) {
+function validateStaff(req) {
     if (!mongoose.Types.ObjectId.isValid(req.body.requester)) {
         throw new CustomErrors.InvalidStaffIdError();
     }
@@ -36,10 +35,9 @@ function validateStaff(req, res) {
 /**
  * Validate if printer exists and can print the object
  * @param {*} req 
- * @param {*} res
  * @returns {Promise} 
  */
-function validatePrinter(req, res) {
+function validatePrinter(req) {
     if (!mongoose.Types.ObjectId.isValid(req.body.printer)) {
         throw new CustomErrors.InvalidPrinterIdError();
     }
@@ -109,10 +107,9 @@ function getOperators() {
 /**
  * Extract the order from request
  * @param {*} req request sent from UI
- * @param {*} res 
  * @returns {Promise}
  */
-function createNewOrder(req, res) {
+function createNewOrder(req) {
     return Order.create({
         _id: mongoose.Types.ObjectId(),
         requester: req.body.requester,
@@ -159,8 +156,8 @@ function updateHistory(event, order) {
 
 // Create a request
 router.post("/", (req, res) => {
-    Promise.all([validateStaff(req, res), validatePrinter(req, res)])
-        .then(_ => createNewOrder(req, res))
+    Promise.all([validateStaff(req), validatePrinter(req)])
+        .then(_ => createNewOrder(req))
         .then(order => updateHistory({
             emittorId: order.requester,
             description: "Order created",
