@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const config = require('./config.json');
+const config = require('../config.json');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require("mongoose");

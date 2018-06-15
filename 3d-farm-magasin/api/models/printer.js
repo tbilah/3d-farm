@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const printerStates = require('../../config.json').states.printer;
+const printerStates = require('../../../config.json').states.printer;
 
 const printerSpecsSchema = mongoose.Schema({
     layerResolution: Number, // In microns

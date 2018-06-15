@@ -1,10 +1,10 @@
 const http = require('http');
-const config = require('./config.json');
+const config = require('../config.json');
 const app = require('./app');
 
-const port = config.server.port;
+const port = config.cam.port;
 const server = http.createServer(app);
 
-console.log("Server started on port " + port);
+console.log("Camera service started on " + config.cam.domain + ":" + config.cam.port);
 
 server.listen(port);

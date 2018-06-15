@@ -1,5 +1,5 @@
 const express = require('express');
-const config = require('./config.json');
+const config = require('../config.json');
 const app = express();
 const logger = require('morgan');
 const bodyParser = require('body-parser');
@@ -9,7 +9,7 @@ const cameraRoutes = require('./api/routes/camera');
 const pictureRoutes = require('./api/routes/picture');
 
 mongoose.connect(
-    'mongodb+srv://' + config.server.db.user + ':' + config.server.db.password + '@3d-farm-cluster-hl6rg.mongodb.net/test?retryWrites=true',
+    'mongodb+srv://' + config.db.user + ':' + config.db.password + '@3d-farm-cluster-hl6rg.mongodb.net/test?retryWrites=true',
 );
 
 mongoose.Promise = global.Promise;
