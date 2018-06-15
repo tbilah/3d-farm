@@ -78,7 +78,7 @@ function SMSTextfrom(event, order) {
     let emitterURL = magasinURL + "/staff/" + event.emittorId;
     let msg = event.description + ". By " + event.emitter.name
         + ". Date: " + event.date.toLocaleString("en-GB");
-    console.log(msg);
+    console.log("SMS message: " + msg);
     return msg;
 }
 
@@ -90,7 +90,7 @@ function getMailAndPhones(destIds, emittorId) {
             if (result.length === 0) {
                 throw new Error("No such destination id");
             } else {
-                console.log(result);
+                console.log("Staffs: " + result);
                 return result;
             }
         });
@@ -145,14 +145,10 @@ router.post("/", (req, res) => {
             }
             return o;
         })
-        .then(o => {
-            console.log(o);
-            return o;
-        })
         .then(
             o => Promise.all([
                 sendMail(o.destNamesMailsPhones, o.event, o.order),
-                sendSMS(o.destNamesMailsPhones, o.event, o.order)
+                // sendSMS(o.destNamesMailsPhones, o.event, o.order)
             ]),
             err => {
                 console.error(err);

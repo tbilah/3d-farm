@@ -68,7 +68,7 @@ function validatePrinter(req) {
  * @returns {Promise}
  */
 function notifyAllConcerningPeople(order, event) {
-    return getConcerningPeople(order)
+    return getConcerningPeopleIds(order, event)
         .then(peoples =>
             agent.post(notificationURL)
                 .send({
@@ -82,12 +82,16 @@ function notifyAllConcerningPeople(order, event) {
                 }));
 }
 
-function getConcerningPeople(order) {
+function getConcerningPeopleIds(order, event) {
     return Promise.all([getOperators(), getDepartementLeader(order)])
         .then(people => {
-            people = people[0].concat(people[1]).map(p => p._id);
-            console.log("Concerning people: ", people);
-            return people;
+            console.log("order:", order);
+            let concerningPeopleIds = people[0].map(p => p._id)
+                .concat(mongoose.Types.ObjectId(event.emittorId),
+                    mongoose.Types.ObjectId(order.requester));
+            if (people[1]._id) concerningPeopleIds = concerningPeopleIds.concat(people[1]._id);
+            console.log("Concerning people: ", concerningPeopleIds);
+            return concerningPeopleIds;
         });
 }
 
@@ -169,8 +173,9 @@ function getOrder(id) {
 
 function getEvent(req) {
     let event = {};
-    if (!req.body.emittorId || mongoose.Types.ObjectId.isValid(req.body.emittorId)) throw new FarmError("Invalid emitter id", 400);
+    if (!req.body.emittorId || !mongoose.Types.ObjectId.isValid(req.body.emittorId)) throw new FarmError("Invalid emitter id", 400);
     event.emittorId = req.body.emittorId;
+    if (!req.body.date || typeof req.body.date !== "number") throw new FarmError("Date must be a number", 400);
     event.date = new Date(req.body.date);
     if (typeof req.body.action !== "string" || config.actions.indexOf(req.body.action.toUpperCase()) < 0)
         throw new FarmError("Action must be in " + config.actions, 400);
