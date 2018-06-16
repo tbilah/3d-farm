@@ -8,21 +8,9 @@ import {
 import Home from './Home';
 
 class Login extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-        redirect: false,
-        user: null
-      };
-    }
-
     onSuccess(googleUser) {
-        this.props.history.push({
-            pathname : '/home',
-            state : {
-                user : googleUser
-            }
-        });
+        sessionStorage.setItem('user', JSON.stringify(googleUser));
+        this.props.history.push('/home');
     }
 
     onFailure(response) {

@@ -5,8 +5,10 @@ class Home extends Component {
     render() {
         return (
             <div>
-            	{console.log(this.props.history.location.state.user)}
-            	<Navbar user={this.props.history.location.state.user} />
+            	{console.log(JSON.parse(sessionStorage.getItem('user')))}
+            	<Navbar>
+            		<div>add content here</div>
+            	</Navbar>
             </div>
         );
     }

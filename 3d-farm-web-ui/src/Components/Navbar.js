@@ -17,7 +17,7 @@ class Navbar extends Component {
                                 <a href="/home">Vue d'ensemble</a>
                             </li>
                             <li>
-                                <a href="/home">Utilisateur</a>
+                                <a href="/users">Utilisateur</a>
                             </li>
                             <li>
                                 <a href="/home">Groupe</a>
@@ -39,11 +39,11 @@ class Navbar extends Component {
 
                     <div id="page-content-wrapper">
                         <nav className="navbar navbar-dark bg-dark">
-                            <a className="navbar-brand"><font color='white'>Bienvenue, {this.props.user.profileObj.name}</font></a>
+                            <a className="navbar-brand"><font color='white'>Bienvenue, {JSON.parse(sessionStorage.getItem('user')).profileObj.name}</font></a>
                             <li className="nav-item dropdown">
                                 <a className="nav-link dropdown-toggle" href='/' id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                                     style={{display : 'inline-block'}}>
-                                  <img src={this.props.user.profileObj.imageUrl} alt='' width='30' height='30' />
+                                  <img src={JSON.parse(sessionStorage.getItem('user')).profileObj.imageUrl} alt='' width='30' height='30' />
                                 </a>
                                 <div className='dropdown-menu' aria-labelledby="navbarDropdown">
                                   <a className="dropdown-item" href="/">Logout</a>
@@ -52,9 +52,7 @@ class Navbar extends Component {
                         </nav>
                     </div>
 
-                    <div>
-                        add content here
-                    </div>
+                    {this.props.children}
                 </div>   
             </div>
         );
