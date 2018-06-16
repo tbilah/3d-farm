@@ -24,8 +24,9 @@ class Users extends Component {
 
     render() {
         return (
-            <div>
-            	<Navbar>
+        	<Navbar>
+                <div className="container-fluid">
+                    <h1>Utilisateurs</h1>
             		<table className="table">
                       <thead className="thead-dark">
                         <tr>
@@ -52,8 +53,8 @@ class Users extends Component {
                         })}
                       </tbody>
                     </table>
-            	</Navbar>
-            </div>
+                </div>
+        	</Navbar>
         );
     }
 }

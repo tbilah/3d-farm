@@ -10,6 +10,7 @@ router.get('/', (req, res) => {
             if (Array.isArray(printers) && printers.length > 0) {
                 res.status(200).json({
                     message: 'List of printers',
+                    count: printers.length,
                     printers: printers.map(p => {
                         p.request = {
                             type: "GET",
