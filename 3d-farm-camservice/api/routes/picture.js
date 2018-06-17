@@ -72,6 +72,7 @@ router.get('/:id', (req, res, next) => {
     Picture.findOne({
             _id: req.params.id
         })
+        .populate('cameraId')
         .exec()
         .then(pic => {
             if (pic) {
@@ -120,6 +121,7 @@ router.post('/', upload.single('image'), (req, res, next) => {
                 picture: {
                     _id: picture._id,
                     reference: picture.reference,
+                    image: picture.image,
                     requests: {
                         get: requestsTemplate.get.replace(/\$ID/, picture._id),
                         delete: requestsTemplate.delete.replace(/\$ID/, picture._id)
