@@ -6,6 +6,9 @@ const cameraSchema = mongoose.Schema({
         type: String,
         required: true,
     },
+    printer: {
+        type: mongoose.Schema.Types.ObjectId
+    },
     deactivated: {
         type: Boolean,
         default: false
