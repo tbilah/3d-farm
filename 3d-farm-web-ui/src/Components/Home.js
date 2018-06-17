@@ -6,47 +6,70 @@ class Home extends Component {
         super(props);
         this.state = {
             userCount: null,
-			printerCount: null,
-			availPrinterCount: null,
-			downPrinterCount: null,
+            printers: {
+            	printerCount: null,
+            	availPrinterCount: null,
+				downPrinterCount: null
+            },
 			cameraCount: null,
-			pictureCount: null
+			pictureCount: null,
+			orders: {
+            	orderCount: null,
+            	waitingCount: null,
+            	beingPrintedCount: null,
+            	pausedCount: null,
+            	canceledCount: null,
+            	doneCount: null
+            }
         };
     }
 
-    componentDidMount() {
-        fetch('http://localhost:3001/staff/', {method : 'GET'})
-            .then((response) => response.json())
-            .then((responseJson) => {
-               this.setState({
-                  userCount: responseJson.count
-               });
-            })
-            .catch((error) => {
-              console.error(error);
+    /*
+		implementation of idempotent retry design pattern
+    */
+    fetchForStaff(count, total) {
+    	fetch('http://localhost:3001/staff/', {method : 'GET'})
+        .then((response) => response.json())
+        .then((responseJson) => {
+            this.setState({
+                userCount: responseJson.count
             });
+        })
+        .catch((error) => {
+        	console.error(error);
+        	if (count < total) {
+        		// wait 5 seconds and recall the function
+        		setTimeout(() => {
+            		this.fetchForStaff(count + 1, total);
+            	}, 5000);
+        	}
+        });
+    }
+
+    componentDidMount() {
+		this.fetchForStaff(0, 3);
 
         fetch('http://localhost:3001/printers/', {method : 'GET'})
             .then((response) => response.json())
             .then((responseJson) => {
-               this.setState({
-                  printerCount: responseJson.count
-               });
-
                let availPrinterCount = 0;
                let downPrinterCount = 0;
-               responseJson.printers.map(p => {
-                  if (p.state === "AVAILABLE") {
-                  	 availPrinterCount ++;
-                  } else if (p.state === "DOWN") {
-                  	 downPrinterCount ++;
-                  }
+               responseJson.printers.forEach(p => {
+               		switch (p.state) {
+               			case "AVAILABLE" : 
+               				availPrinterCount ++;
+               				break;
+               			case "DOWN" : 
+               				downPrinterCount ++;
+               				break;
+               		}
                });
                this.setState({
-                  availPrinterCount: availPrinterCount
-               });
-               this.setState({
-                  downPrinterCount: downPrinterCount
+                    printers: {
+                    	printerCount: responseJson.count,
+               			availPrinterCount: availPrinterCount,
+               			downPrinterCount: downPrinterCount
+               		}
                });
             })
             .catch((error) => {
@@ -74,6 +97,48 @@ class Home extends Component {
             .catch((error) => {
               console.error(error);
             });
+
+        fetch('http://localhost:3010/order/', {method : 'GET'})
+            .then((response) => response.json())
+            .then((responseJson) => {
+                let waitingCount = 0;
+	            let beingPrintedCount = 0;
+	            let pausedCount = 0;
+	            let canceledCount = 0;
+	            let doneCount = 0;
+	            responseJson.forEach(o => {
+	            	switch (o.state) {
+	           			case "WAITING" : 
+	           				waitingCount ++;
+	           				break;
+	           			case "BEING_PRINTED" : 
+	           				beingPrintedCount ++;
+	           				break;
+	           			case "PAUSED" : 
+	           				pausedCount ++;
+	           				break;
+	           			case "CANCELED" : 
+	           				canceledCount ++;
+	           				break;
+	           			case "DONE" : 
+	           				doneCount ++;
+	           				break;
+	           		}
+	            });
+	            this.setState({
+                  orders: {
+                  		orderCount: responseJson.length,
+                  		waitingCount: waitingCount,
+                  		beingPrintedCount: beingPrintedCount,
+                  		pausedCount: pausedCount,
+                  		canceledCount: canceledCount,
+                  		doneCount: doneCount
+                  }
+               });
+            })
+            .catch((error) => {
+              console.error(error);
+            });
     }
 
     render() {
@@ -88,13 +153,10 @@ class Home extends Component {
 					      	<span className="float-right">{this.state.userCount}</span>
 					      </div>
 					      <div>Imprimantes
-					      	<span className="float-right">{this.state.printerCount}</span>
+					      	<span className="float-right">{this.state.printers.printerCount}</span>
 					      </div>
-					      <div>&nbsp;&nbsp;-&nbsp;Disponibles
-					      	<span className="float-right">{this.state.availPrinterCount}</span>
-					      </div>
-					      <div>&nbsp;&nbsp;-&nbsp;Indisponibles
-					      	<span className="float-right">{this.state.downPrinterCount}</span>
+					      <div>Impressions
+					      	<span className="float-right">{this.state.orders.orderCount}</span>
 					      </div>
 					      <div>Caméras
 					      	<span className="float-right">{this.state.cameraCount}</span>
@@ -108,11 +170,41 @@ class Home extends Component {
 					  <div className="card">
 					    <div className="card-body">
 					      <h5 className="card-title">Etat du système</h5>
-					      
+					      <div>Imprimantes
+					      	<span className="float-right">{this.state.printers.printerCount}</span>
+					      </div>
+					      <div>&nbsp;&nbsp;-&nbsp;Disponibles
+					      	<span className="float-right">{this.state.printers.availPrinterCount}</span>
+					      </div>
+					      <div>&nbsp;&nbsp;-&nbsp;Indisponibles
+					      	<span className="float-right">{this.state.printers.downPrinterCount}</span>
+					      </div>
 					    </div>
 					  </div>
 
-					  
+					  <div className="card">
+					    <div className="card-body">
+					      <h5 className="card-title">Etat des impressions</h5>
+					      <div>Impressions
+					      	<span className="float-right">{this.state.orders.orderCount}</span>
+					      </div>
+					      <div>&nbsp;&nbsp;-&nbsp;En attente
+					      	<span className="float-right">{this.state.orders.waitingCount}</span>
+					      </div>
+					      <div>&nbsp;&nbsp;-&nbsp;En cours d'impression
+					      	<span className="float-right">{this.state.orders.beingPrintedCount}</span>
+					      </div>
+					      <div>&nbsp;&nbsp;-&nbsp;Mis en pause
+					      	<span className="float-right">{this.state.orders.pausedCount}</span>
+					      </div>
+					      <div>&nbsp;&nbsp;-&nbsp;Annulée
+					      	<span className="float-right">{this.state.orders.canceledCount}</span>
+					      </div>
+					      <div>&nbsp;&nbsp;-&nbsp;terminée
+					      	<span className="float-right">{this.state.orders.doneCount}</span>
+					      </div>
+					    </div>
+					  </div>
 					</div>
         		</div>
         	</Navbar>
