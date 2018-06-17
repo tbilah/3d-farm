@@ -62,6 +62,7 @@ class Home extends Component {
                			case "DOWN" : 
                				downPrinterCount ++;
                				break;
+               			default : return;
                		}
                });
                this.setState({
@@ -123,6 +124,7 @@ class Home extends Component {
 	           			case "DONE" : 
 	           				doneCount ++;
 	           				break;
+	           			default : return;
 	           		}
 	            });
 	            this.setState({

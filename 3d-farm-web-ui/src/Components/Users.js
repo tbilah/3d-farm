@@ -41,7 +41,7 @@ class Users extends Component {
                       <tbody>
                         {this.state.users.map(function(user, index) {
                             return (
-                                <tr>
+                                <tr key={index}>
                                     <td>{user._id}</td>
                                     <td>{user.name}</td>
                                     <td>{user.email}</td>

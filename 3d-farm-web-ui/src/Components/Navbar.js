@@ -14,10 +14,10 @@ class Navbar extends Component {
                                 </a>
                             </li>
                             <li>
-                                <a href="/home">Vue d'ensemble</a>
+                                <a href="/home" className={window.location.pathname === "/home" ? "current" : ""}>Vue d'ensemble</a>
                             </li>
                             <li>
-                                <a href="/users">Utilisateur</a>
+                                <a href="/users" className={window.location.pathname === "/users" ? "current" : ""}>Utilisateur</a>
                             </li>
                             <li>
                                 <a href="/home">Groupe</a>
