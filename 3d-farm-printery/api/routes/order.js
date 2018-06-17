@@ -6,6 +6,7 @@ const agent = require("superagent");
 const config = require("../../../config.json");
 const FarmError = require("../errors/FarmError");
 const CustomErrors = require("../errors/CustomErrors");
+const logError = require('../../../3d-farm-logging/logging');
 const notificationURL = config.notification.domain + ":" + config.notification.port;
 const printeryURL = config.printery.domain + ":" + config.printery.port;
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
@@ -233,7 +234,7 @@ router.post("/", (req, res) => {
             order: order
         }))
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 return res.status(err.status).json(err);
             } else {
@@ -253,7 +254,7 @@ router.get("/:orderId", (req, res) => {
             res.status(200).json(order);
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 res.status(err.status).json(err);
             } else {
@@ -269,7 +270,7 @@ router.post("/:orderId", (req, res) => {
         .then(_ => notifyAllConcerningPeople(_.order, _.event))
         .then(order => res.status(200).json({ order }))
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 return res.status(err.status).json(err);
             } else {
@@ -297,7 +298,7 @@ router.get("/", (req, res) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 res.status(err.status).json(err);
             } else {

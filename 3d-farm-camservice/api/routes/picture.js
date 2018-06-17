@@ -3,6 +3,7 @@ const config = require('../../../config');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
+const logError = require('../../../3d-farm-logging/logging');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -61,7 +62,7 @@ router.get('/', (req, res, next) => {
             res.status(200).json(response);
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });
@@ -92,6 +93,7 @@ router.get('/:id', (req, res, next) => {
             }
         })
         .catch(err => {
+            logError(err);
             res.status(500).json({
                 error: err
             });
@@ -130,7 +132,7 @@ router.post('/', upload.single('image'), (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             })
@@ -155,7 +157,7 @@ router.delete('/:id', (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });

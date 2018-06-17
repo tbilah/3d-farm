@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Printer = require('../models/printer');
 const config = require('../../../config.json');
+const logError = require('../../../3d-farm-logging/logging');
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 
 router.get('/', (req, res) => {
@@ -26,7 +27,7 @@ router.get('/', (req, res) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             res.status(500).json({
                 message: "Internal error. " + err
             });
@@ -57,7 +58,7 @@ router.post('/', (req, res) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             res.status(500).json({
                 message: "Internal error",
                 error: err
@@ -96,7 +97,7 @@ router.get('/:printerId', (req, res) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             res.status(500).json({
                 message: "Internal error",
                 error: err
@@ -117,7 +118,7 @@ router.delete('/:printerId', (req, res) => {
             });
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });

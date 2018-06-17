@@ -46,10 +46,8 @@ class Home extends Component {
         });
     }
 
-    componentDidMount() {
-		this.fetchForStaff(0, 3);
-
-        fetch('http://localhost:3001/printers/', {method : 'GET'})
+    fetchForPrinter() {
+    	fetch('http://localhost:3001/printers/', {method : 'GET'})
             .then((response) => response.json())
             .then((responseJson) => {
                let availPrinterCount = 0;
@@ -76,8 +74,10 @@ class Home extends Component {
             .catch((error) => {
               console.error(error);
             });
+    }
 
-        fetch('http://localhost:3002/cameras/', {method : 'GET'})
+    fetchForCamera() {
+    	fetch('http://localhost:3002/cameras/', {method : 'GET'})
             .then((response) => response.json())
             .then((responseJson) => {
                this.setState({
@@ -87,8 +87,10 @@ class Home extends Component {
             .catch((error) => {
               console.error(error);
             });
+    }
 
-        fetch('http://localhost:3002/pictures/', {method : 'GET'})
+    fetchForPicture() {
+    	fetch('http://localhost:3002/pictures/', {method : 'GET'})
             .then((response) => response.json())
             .then((responseJson) => {
                this.setState({
@@ -98,8 +100,10 @@ class Home extends Component {
             .catch((error) => {
               console.error(error);
             });
+    }
 
-        fetch('http://localhost:3010/order/', {method : 'GET'})
+    fetchForOrder() {
+    	fetch('http://localhost:3010/order/', {method : 'GET'})
             .then((response) => response.json())
             .then((responseJson) => {
                 let waitingCount = 0;
@@ -141,6 +145,14 @@ class Home extends Component {
             .catch((error) => {
               console.error(error);
             });
+    }
+
+    componentDidMount() {
+    	this.fetchForPrinter();
+		this.fetchForCamera();
+		this.fetchForPicture();
+		this.fetchForOrder();
+		this.fetchForStaff(0, 3);
     }
 
     render() {

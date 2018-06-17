@@ -3,6 +3,7 @@ const config = require('../../../config');
 const Staff = require('../models/staff');
 const router = express.Router();
 const mongoose = require('mongoose');
+const logError = require('../../../3d-farm-logging/logging');
 
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 
@@ -31,9 +32,11 @@ router.get('/', (req, res, next) => {
                 })
             };
             res.status(200).json(response);
+            logError(users);
+            console.log(users);
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });
@@ -57,7 +60,7 @@ router.get('/:id', (req, res, next) => {
             }
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });
@@ -91,7 +94,7 @@ router.post('/', (req, res, next) => {
         });
     })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             })
@@ -121,7 +124,7 @@ router.patch('/:id', (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });
@@ -146,7 +149,7 @@ router.delete('/:id', (req, res, next) => {
             })
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });
