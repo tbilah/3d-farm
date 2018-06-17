@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
-const Staff = require("../models/staff");
 const config = require("../../../config.json");
 const gmailConfig = require("../../gmail.json");
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
@@ -9,6 +8,7 @@ const printeryURL = config.printery.domain + ":" + config.printery.port;
 const nexmoConfig = require("../../nexmo.json");
 const Nexmo = require("nexmo");
 const nexmo = new Nexmo(nexmoConfig, { debug: true });
+const agent = require("superagent");
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; // Only for dev server
 const gmailSender = require("gmail-send")({
     user: gmailConfig.user,
@@ -45,6 +45,7 @@ function asyncSMSSender(from, to, text) {
 
 function sendMail(dest, event, order) {
     // The emitter is in event
+    console.log("Dest mails:", dest.map(d => d.email));
     return asyncGmailSender({
         to: dest.map(d => d.email),
         html: HTMLfrom(event, order)
@@ -70,6 +71,7 @@ function toInter(FRphone) {
 
 function sendSMS(dest, event, order) {
     let msg = SMSTextfrom(event, order);
+    console.log("Dest phones:", dest.map(p => toInter(p.phone)));
     return Promise.all(dest.map(person => asyncSMSSender("3DFarmNotification", toInter(person.phone), msg)));
 }
 
@@ -82,15 +84,16 @@ function SMSTextfrom(event, order) {
     return msg;
 }
 
-function getMailAndPhones(destIds, emittorId) {
-    let allIDs = [emittorId].concat(destIds);
-    console.log("Searching staff in " + allIDs);
-    return Staff.find({}).where("_id").in(allIDs).select("name email phone").exec()
+function getDestUsers(destIds) {
+    console.log("Searching staff:", destIds);
+    return agent.get(magasinURL + "/staff/")
+        .then(res => res.body.users)
+        .then(users => users.filter(u => destIds.indexOf(u._id) >= 0))
         .then(result => {
             if (result.length === 0) {
                 throw new Error("No such destination id");
             } else {
-                console.log("Staffs: " + result);
+                console.log("Staffs: ", result.map(u => { u.name, u.phone, u.email }));
                 return result;
             }
         });
@@ -115,7 +118,6 @@ function basicValidate(req) {
     if (!mongoose.Types.ObjectId.isValid(event.emittorId)) {
         throw new Error(event.emittorId + " is not a valid staff id");
     }
-    event.emittorId = mongoose.Types.ObjectId(event.emittorId);
     if (typeof event.date === "string") {
         event.date = parseInt(event.date, 10);
     }
@@ -126,29 +128,20 @@ function basicValidate(req) {
     if (!mongoose.Types.ObjectId.isValid(order._id)) {
         throw new Error(id + " is not a valid order id");
     }
-    order._id = mongoose.Types.ObjectId(order._id);
-    return getMailAndPhones(dest, event.emittorId)
-        .then(destNamesMailsPhones => { return { destNamesMailsPhones, event, order } });
+    return getDestUsers(dest, event.emittorId)
+        .then(destUsers => {
+            event.emitter = destUsers.find(u => event.emittorId === u._id);
+            if (!event.emitter) throw new Error("Unknow emitter");
+            return { destUsers, event, order };
+        });
 }
 
 router.post("/", (req, res) => {
     basicValidate(req)
-        .then(o => {
-            o.destNamesMailsPhones.forEach(p => {
-                if (o.event.emittorId.equals(p._id)) {
-                    o.event.emitter = p;
-                    return;
-                }
-            });
-            if (!o.event.emitter) {
-                throw new Error("Emitter not found");
-            }
-            return o;
-        })
         .then(
             o => Promise.all([
-                sendMail(o.destNamesMailsPhones, o.event, o.order),
-                // sendSMS(o.destNamesMailsPhones, o.event, o.order)
+                sendMail(o.destUsers, o.event, o.order),
+                // sendSMS(o.destUsers, o.event, o.order)
             ]),
             err => {
                 console.error(err);
