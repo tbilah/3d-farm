@@ -10,7 +10,6 @@ router.get('/', (req, res) => {
             if (Array.isArray(printers) && printers.length > 0) {
                 res.status(200).json({
                     message: 'List of printers',
-                    count: printers.length,
                     printers: printers.map(p => {
                         p.request = {
                             type: "GET",
@@ -82,7 +81,7 @@ router.post('/', (req, res) => {
 });
 
 router.get('/:printerId', (req, res) => {
-    Printer.findById(req.param.printerId).exec()
+    Printer.findById(req.params.printerId).exec()
         .then(printer => {
             if (printer) {
                 res.status(201).json({
@@ -105,7 +104,7 @@ router.get('/:printerId', (req, res) => {
 });
 
 router.delete('/:printerId', (req, res) => {
-    Printer.findByIdAndRemove(req.param.printerId).exec()
+    Printer.findByIdAndRemove(req.params.printerId).exec()
         .then(printer => {
             if (!printer) {
                 return res.status(404).json({
