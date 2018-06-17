@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Printer = require('../models/printer');
-const config = require('../../config');
+const config = require('../../../config.json');
+const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 
 router.get('/', (req, res) => {
     Printer.find().exec()
@@ -13,7 +14,7 @@ router.get('/', (req, res) => {
                     printers: printers.map(p => {
                         p.request = {
                             type: "GET",
-                            url: config.server.domain + ":" + config.server.port + "/printers/" + p._id
+                            url: magasinURL + "/printers/" + p._id
                         };
                         return p;
                     })
