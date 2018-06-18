@@ -187,7 +187,7 @@ class Users extends Component {
                           <th scope="col">Portable</th>
                           <th scope="col">Type</th>
                           <th scope="col">Département</th>
-                          <th scope="col" className="text-center"><Octicon name="gear"/></th>
+                          <th scope="col" width="8%" className="text-center"><Octicon name="gear"/></th>
                         </tr>
                       </thead>
                       <tbody>
