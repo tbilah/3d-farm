@@ -32,7 +32,6 @@ router.get('/', (req, res, next) => {
                 })
             };
             res.status(200).json(response);
-            logError(users);
             console.log(users);
         })
         .catch(err => {
