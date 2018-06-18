@@ -15,6 +15,10 @@
         "domain": "http://localhost",
         "port": 3002
     },
+    "stl": {
+        "domain": "http://localhost",
+        "port": 3005
+    },
     "notification": {
         "domain": "http://localhost",
         "port": 3008
