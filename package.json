@@ -22,5 +22,8 @@
   "homepage": "https://github.com/tbilah/3d-farm#readme",
   "devDependencies": {
     "concurrently": "^3.5.1"
+  },
+  "dependencies": {
+    "reactstrap": "^6.1.0"
   }
 }

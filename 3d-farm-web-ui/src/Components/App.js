@@ -7,6 +7,7 @@ import {
     Route,
     Switch
 } from 'react-router-dom'
+import Orders from "./Order/Orders";
 
 class App extends Component {
     render() {
@@ -16,6 +17,7 @@ class App extends Component {
                     <Route exact path='/' component={Login} />
                     <Route path='/home' component={Home} />
                     <Route path='/users' component={Users} />
+                    <Route path="/orders" component={Orders}/>
                 </Switch>
             </Router>
         );

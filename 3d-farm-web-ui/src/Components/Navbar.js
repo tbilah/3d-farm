@@ -20,6 +20,9 @@ class Navbar extends Component {
                                 <a href="/users" className={window.location.pathname === "/users" ? "current" : ""}>Utilisateur</a>
                             </li>
                             <li>
+                                <a href="/orders" className={window.location.pathname === "/orders" ? "current" : ""}>Commandes</a>
+                            </li>
+                            <li>
                                 <a href="/home">Groupe</a>
                             </li>
                             <li>
