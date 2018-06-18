@@ -65,7 +65,7 @@ class Home extends Component {
                });
                this.setState({
                     printers: {
-                    	printerCount: responseJson.count,
+                    	printerCount: responseJson.printers.length,
                			availPrinterCount: availPrinterCount,
                			downPrinterCount: downPrinterCount
                		}
