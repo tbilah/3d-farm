@@ -16,6 +16,7 @@ const magasinURL = config.magasin.domain + ":" + config.magasin.port;
  * @returns {Promise} 
  */
 function validateStaff(req) {
+    console.log(req.body);
     if (!mongoose.Types.ObjectId.isValid(req.body.requester)) {
         throw new CustomErrors.InvalidStaffIdError();
     }
