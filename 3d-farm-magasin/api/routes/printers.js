@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const Printer = require('../models/printer');
 const config = require('../../../config.json').magasin;
 
+const Printer = require('../models/printer');
+
 const requestsTemplate = {
-    get: "curl -X GET " + config.domain + ":" + config.port + "/cameras/$ID",
-    delete: "curl -X DELETE " + config.domain + ":" + config.port + "/cameras/$ID"
+    get: "curl -X GET " + config.domain + ":" + config.port + "/printers/$ID",
+    delete: "curl -X DELETE " + config.domain + ":" + config.port + "/printers/$ID"
 }
 
 router.get('/', (req, res, next) => {

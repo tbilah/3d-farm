@@ -115,18 +115,19 @@ router.post('/', upload.single('image'), (req, res, next) => {
                 timestamp: req.body.timestamp,
                 image: req.file.path
             })
-            picture.save();
-            return res.status(201).json({
-                message: "Picture created successfully",
-                picture: {
-                    _id: picture._id,
-                    reference: picture.reference,
-                    image: picture.image,
-                    requests: {
-                        get: requestsTemplate.get.replace(/\$ID/, picture._id),
-                        delete: requestsTemplate.delete.replace(/\$ID/, picture._id)
+            picture.save().then(pic => {
+                res.status(201).json({
+                    message: "Picture created successfully",
+                    picture: {
+                        _id: picture._id,
+                        timestamp: picture.timestamp,
+                        image: picture.image,
+                        requests: {
+                            get: requestsTemplate.get.replace(/\$ID/, picture._id),
+                            delete: requestsTemplate.delete.replace(/\$ID/, picture._id)
+                        }
                     }
-                }
+                })
             });
         })
         .catch(err => {
