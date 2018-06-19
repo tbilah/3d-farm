@@ -103,8 +103,10 @@ router.post('/', (req, res, next) => {
 router.patch('/:id', (req, res, next) => {
     const id = req.params.id;
     const updateOps = {};
-    for (const ops of req.body) {
-        updateOps[ops.propName] = ops.value;
+    for (var key in req.body) {
+      if (req.body.hasOwnProperty(key)) {
+        updateOps[key] = req.body[key];
+      }
     }
     Staff.findOneAndUpdate({
         _id: id

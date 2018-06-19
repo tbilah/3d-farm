@@ -1,20 +1,38 @@
 import React, { Component } from 'react';
 import GoogleLogin from 'react-google-login';
 import {
-  BrowserRouter as Router,
-  Route,
   withRouter
 } from 'react-router-dom';
-import Home from './Home';
 
 class Login extends Component {
+    fetchForStaff = (googleUser) => {
+        fetch('http://localhost:3001/staff/', {method : 'GET'})
+        .then((response) => response.json())
+        .then((responseJson) => {
+            for(let i = 0; i < responseJson.users.length; i++) {
+                if(googleUser.profileObj.email.toUpperCase() === responseJson.users[i].email.toUpperCase()) {
+                    googleUser.magasin = responseJson.users[i];
+                }
+            }
+            console.log(googleUser);
+            sessionStorage.setItem('user', JSON.stringify(googleUser));
+            this.props.history.push('/home');
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    }
+
     onSuccess(googleUser) {
-        sessionStorage.setItem('user', JSON.stringify(googleUser));
-        this.props.history.push('/home');
+        this.fetchForStaff(googleUser);
     }
 
     onFailure(response) {
         console.log(response);
+    }
+
+    logout = () => {
+      console.log('logout')
     }
 
     render() {
@@ -31,16 +49,10 @@ class Login extends Component {
                                 onSuccess={this.onSuccess.bind(this)}
                                 onFailure={this.onFailure.bind(this)}
                                 className="btn btn-primary"
-                                style={{marginLeft:10}}
                             />
-                        </div>   
+                        </div>
                     </form>
                 </div>
-                <Router>
-                    <div>
-                        <Route exact path="/home" render={() => <Home user={this.state.googleUser} />} />
-                    </div> 
-                </Router>
             </div>
         );
     }
