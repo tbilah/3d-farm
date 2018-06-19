@@ -2,15 +2,14 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const Order = require("../models/order");
-const Printer = require("../models/printer");
-const Staff = require("../models/staff");
 const agent = require("superagent");
 const config = require("../../../config.json");
 const FarmError = require("../errors/FarmError");
 const CustomErrors = require("../errors/CustomErrors");
+const logError = require('../../../3d-farm-logging/logging');
 const notificationURL = config.notification.domain + ":" + config.notification.port;
 const printeryURL = config.printery.domain + ":" + config.printery.port;
-
+const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 /**
  * Validate if staff exists and has enough money
  * @param {*} req 
@@ -20,15 +19,19 @@ function validateStaff(req) {
     if (!mongoose.Types.ObjectId.isValid(req.body.requester)) {
         throw new CustomErrors.InvalidStaffIdError();
     }
-    return Staff.findById(req.body.requester)
-        .exec()
-        .then(staff => {
-            // Check existence
-            if (!staff) {
-                throw new CustomErrors.InexistingStaffError();
+    return agent.get(magasinURL + "/staff/" + req.body.requester)
+        .then(res => {
+            if (res.ok) return res.body;
+        })
+        .catch(err => {
+            switch (err.status) {
+                case 404:
+                    throw new CustomErrors.InexistingStaffError();
+                    break;
+                default:
+                    throw new FarmError(err.body.err, err.status);
+                    break;
             }
-            // TODO Check money
-            // For instance, welp, return true
         });
 }
 
@@ -41,20 +44,25 @@ function validatePrinter(req) {
     if (!mongoose.Types.ObjectId.isValid(req.body.printer)) {
         throw new CustomErrors.InvalidPrinterIdError();
     }
-    return Printer.findById(req.body.printer)
-        .select("_id state specs")
-        .exec()
-        .then(printer => {
-            // Check existence
-            if (!printer) {
-                throw new CustomErrors.InexistingPrinterError();
+    return agent.get(magasinURL + "/printers/" + req.body.printer)
+        .then(res => {
+            if (res.ok) {
+                let printer = res.body.printer;
+                if (printer.state === "DOWN") {
+                    throw new CustomErrors.UnavailablePrinterError(printer);
+                }
+                return printer;
             }
-            // Check state
-            if (printer.state === "DOWN") {
-                throw new CustomErrors.UnavailablePrinterError(printer);
+        })
+        .catch(err => {
+            switch (err.status) {
+                case 404:
+                    throw new CustomErrors.InexistingPrinterError();
+                    break;
+                default:
+                    throw new FarmError(err.body.message, err.status);
+                    break;
             }
-            // TODO Check if object fits in
-            // For instance, welp, return true
         });
 }
 
@@ -83,29 +91,31 @@ function notifyAllConcerningPeople(order, event) {
 }
 
 function getConcerningPeopleIds(order, event) {
-    return Promise.all([getOperators(), getDepartementLeader(order)])
-        .then(people => {
-            console.log("order:", order);
-            let concerningPeopleIds = people[0].map(p => p._id)
-                .concat(mongoose.Types.ObjectId(event.emittorId),
-                    mongoose.Types.ObjectId(order.requester));
-            if (people[1]._id) concerningPeopleIds = concerningPeopleIds.concat(people[1]._id);
-            console.log("Concerning people: ", concerningPeopleIds);
-            return concerningPeopleIds;
+    return agent.get(magasinURL + "/staff/")
+        .then(res => {
+            // get all users
+            // then filter out
+            return res.body.users
+        })
+        .then(users => {
+            // Requester
+            let requesterId = mongoose.Types.ObjectId(order.requester);
+            let requester = users.find(u => requesterId.equals(mongoose.Types.ObjectId(u._id)));
+            // Dept leader
+            let leaders = users.filter(u => u.departement === requester.departement && u.type === "LEADER");
+            // Operators
+            let operators = users.filter(u => u.type === "OPERATOR");
+            // Emiter
+            let emitterId = mongoose.Types.ObjectId(event.emittorId);
+            let emitter = users.filter(u => emitterId.equals(mongoose.Types.ObjectId(u._id)));
+            return [requester, emitterId].concat(leaders, operators);
+        })
+        .then(concerningPeople => {
+            console.log("Order:", order);
+            let ids = concerningPeople.map(p => p._id);
+            console.log("Concerning people:", ids);
+            return ids;
         });
-}
-
-function getDepartementLeader(order) {
-    return Staff.findById(order.requester).select("departement").exec()
-        .then(requester =>
-            Staff.find({
-                type: "LEADER",
-                departement: requester.departement
-            }).select("_id").exec());
-}
-
-function getOperators() {
-    return Staff.find({ type: "OPERATOR" }).select("_id").exec();
 }
 
 /**
@@ -224,7 +234,7 @@ router.post("/", (req, res) => {
             order: order
         }))
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 return res.status(err.status).json(err);
             } else {
@@ -244,7 +254,7 @@ router.get("/:orderId", (req, res) => {
             res.status(200).json(order);
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 res.status(err.status).json(err);
             } else {
@@ -260,7 +270,7 @@ router.post("/:orderId", (req, res) => {
         .then(_ => notifyAllConcerningPeople(_.order, _.event))
         .then(order => res.status(200).json({ order }))
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 return res.status(err.status).json(err);
             } else {
@@ -288,7 +298,7 @@ router.get("/", (req, res) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             if (err instanceof FarmError) {
                 res.status(err.status).json(err);
             } else {

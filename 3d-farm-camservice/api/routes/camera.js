@@ -2,6 +2,7 @@ const express = require('express');
 const config = require('../../../config.json');
 const router = express.Router();
 const mongoose = require('mongoose');
+const logError = require('../../../3d-farm-logging/logging');
 const rest = require('rest');
 const mime = require('rest/interceptor/mime');
 
@@ -147,6 +148,7 @@ router.patch('/:id', (req, res, next) => {
             });
         })
         .catch(err => {
+            logError(err);
             res.status(500).json({
                 error: err
             });
@@ -171,7 +173,7 @@ router.delete("/:id", (req, res, next) => {
             });
         })
         .catch(err => {
-            console.log(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });

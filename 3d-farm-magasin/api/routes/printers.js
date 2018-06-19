@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const config = require('../../../config.json').magasin;
 
 const Printer = require('../models/printer');
+const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 
 const requestsTemplate = {
     get: "curl -X GET " + config.domain + ":" + config.port + "/printers/$ID",
@@ -32,7 +33,7 @@ router.get('/', (req, res, next) => {
             res.status(200).json(response);
         })
         .catch(err => {
-            console.log(err);
+            console.error(err);
             res.status(500).json({
                 error: err
             });
@@ -63,7 +64,7 @@ router.post('/', (req, res) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             res.status(500).json({
                 message: "Internal error",
                 error: err
@@ -102,7 +103,7 @@ router.get('/:printerId', (req, res) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             res.status(500).json({
                 message: "Internal error",
                 error: err
@@ -123,7 +124,7 @@ router.delete('/:printerId', (req, res) => {
             });
         })
         .catch(err => {
-            console.error(err);
+            logError(err);
             res.status(500).json({
                 error: err
             });

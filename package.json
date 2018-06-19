@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "npm run all:start",
-    "all:start": "concurrently --names \"CA,MA,NO,PR,UI\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold,bgCyan.bold\" \"cd 3d-farm-camservice && npm start\" \"cd 3d-farm-magasin && npm start\" \"cd 3d-farm-notification && npm start\" \"cd 3d-farm-printery && npm start\" \"cd 3d-farm-web-ui && npm start\"",
-    "all:install": "concurrently --names \"CA,MA,NO,PR,UI\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold,bgCyan.bold\" \"cd 3d-farm-camservice && npm install\" \"cd 3d-farm-magasin && npm install\" \"cd 3d-farm-notification && npm install\" \"cd 3d-farm-printery && npm install\" \"cd 3d-farm-web-ui && npm install\""
+    "all:start": "concurrently --names \"CA,MA,NO,PR,UI,ST\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold,bgCyan.bold,bgWhite.bold\" \"cd 3d-farm-camservice && npm start\" \"cd 3d-farm-magasin && npm start\" \"cd 3d-farm-notification && npm start\" \"cd 3d-farm-printery && npm start\" \"cd 3d-farm-web-ui && npm start\" \"cd 3d-farm-stl && npm start\"",
+    "all:install": "concurrently --names \"CA,MA,NO,PR,UI,LO,ST\" -c \"bgBlue.bold,bgRed.bold,bgMagenta.bold,bgYellow.bold,bgCyan.bold,bgGreen.bold,bgWhite.bold\" \"cd 3d-farm-camservice && npm install\" \"cd 3d-farm-magasin && npm install\" \"cd 3d-farm-notification && npm install\" \"cd 3d-farm-printery && npm install\" \"cd 3d-farm-web-ui && npm install\" \"cd 3d-farm-logging && npm install\" \"cd 3d-farm-stl && npm install\""
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,8 @@
   "homepage": "https://github.com/tbilah/3d-farm#readme",
   "devDependencies": {
     "concurrently": "^3.5.1"
+  },
+  "dependencies": {
+    "reactstrap": "^6.1.0"
   }
 }
