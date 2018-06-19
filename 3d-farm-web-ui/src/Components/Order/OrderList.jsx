@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Order from "./Order";
 import OrderCreator from "./OrderCreator";
+import OrderFilter from "./OrderFilter";
 const printeryURL = "http://localhost:3010";
 const magasinURL = "http://localhost:3001";
 
@@ -10,9 +11,17 @@ export default class OrderList extends Component {
         this.state = {
             orders: [],
             printers: [],
-            users: []
+            users: [],
+            filter: [
+                "WAITING",
+                "BEING_PRINTED",
+                "PAUSED",
+                "CANCELED",
+                "DONE"
+            ]
         };
     }
+
     componentDidMount() {
         this.fetchAll();
     }
@@ -23,7 +32,7 @@ export default class OrderList extends Component {
                 console.log(ar);
                 return ar;
             })
-            .then(ar => this.setState({ orders: ar[0], printers: ar[1].printers, users: ar[2].users }))
+            .then(ar => this.setState({ orders: ar[0], printers: ar[1].printers, users: ar[2].users, hiddenOrders: [] }))
             .catch(console.error);
     }
 
@@ -39,15 +48,28 @@ export default class OrderList extends Component {
         return fetch(magasinURL + "/staff", { method: "GET" }).then(res => res.json());
     }
 
+    setFilter(newVisibility) {
+        this.setState({ filter: newVisibility });
+    }
+
+    shouldShow(order) {
+        if (!this.state.filter) return true;
+        console.log(order.state, this.state.filter, this.state.filter.indexOf(order.state));
+        return this.state.filter.indexOf(order.state) >= 0;
+    }
 
     render() {
         return (
             <div className="container">
+                <OrderFilter setFilter={this.setFilter.bind(this)} />
                 <OrderCreator printers={this.state.printers} onSuccess={this.fetchAll.bind(this)} />
-                {this.state.orders.map(o =>
-                    <Order order={o} key={o._id} printers={this.state.printers} users={this.state.users}
-                        onSuccess={this.fetchAll.bind(this)} />
-                )}
+                <div className="OrderList">
+                    {this.state.orders.map(o =>
+                        this.shouldShow(o) ?
+                            <Order order={o} key={o._id} users={this.state.users} onSuccess={this.fetchAll.bind(this)} />
+                            : null
+                    )}
+                </div>
             </div>
         );
     }

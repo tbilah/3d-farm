@@ -1,3 +1,7 @@
-.card.Order {
+.card.Order, .card.OrderCreator, .card.OrderFilter {
     margin: 10px 0;
+}
+
+.OrderVisibility {
+    margin: 0 10px;
 }
