@@ -1,38 +1,30 @@
 import React, { Component } from 'react';
 import GoogleLogin from 'react-google-login';
-import {
-  withRouter
-} from 'react-router-dom';
 
 class Login extends Component {
-    fetchForStaff = (googleUser) => {
-        fetch('http://localhost:3001/staff/', {method : 'GET'})
-        .then((response) => response.json())
-        .then((responseJson) => {
-            for(let i = 0; i < responseJson.users.length; i++) {
-                if(googleUser.profileObj.email.toUpperCase() === responseJson.users[i].email.toUpperCase()) {
-                    googleUser.magasin = responseJson.users[i];
-                }
-            }
-            console.log(googleUser);
-            sessionStorage.setItem('user', JSON.stringify(googleUser));
-            this.props.history.push('/home');
-        })
-        .catch((error) => {
-            console.error(error);
-        });
-    }
-
     onSuccess(googleUser) {
-        this.fetchForStaff(googleUser);
+        fetch('http://localhost:3001/staff/', {method : 'GET'})
+            .then((response) => response.json())
+            .then((responseJson) => {
+                for(let i = 0; i < responseJson.users.length; i++) {
+                    if(googleUser.profileObj.email.toUpperCase() === responseJson.users[i].email.toUpperCase()) {
+                        googleUser.magasin = responseJson.users[i];
+                    }
+                }
+                sessionStorage.setItem('user', JSON.stringify(googleUser));
+                if(!googleUser.magasin) {
+                    window.location.href = 'http://localhost:3000/newUser';
+                } else {
+                    window.location.href = 'http://localhost:3000/home';
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
 
     onFailure(response) {
         console.log(response);
-    }
-
-    logout = () => {
-      console.log('logout')
     }
 
     render() {
@@ -58,4 +50,4 @@ class Login extends Component {
     }
 }
 
-export default withRouter(Login);
+export default Login;
