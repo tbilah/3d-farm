@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import GoogleLogin from 'react-google-login';
 
 class Login extends Component {
+    clientId = "368488107530-funna3ndjd772vt26d9ri20lt3om1p30.apps.googleusercontent.com";
+
     onSuccess(googleUser) {
         fetch('http://localhost:3001/staff/', {method : 'GET'})
             .then((response) => response.json())
@@ -36,7 +38,7 @@ class Login extends Component {
                     <form>
                         <div className="text-center">
                             <GoogleLogin
-                                clientId="368488107530-funna3ndjd772vt26d9ri20lt3om1p30.apps.googleusercontent.com"
+                                clientId={this.clientId}
                                 buttonText="Se connecter avec Google"
                                 onSuccess={this.onSuccess.bind(this)}
                                 onFailure={this.onFailure.bind(this)}
