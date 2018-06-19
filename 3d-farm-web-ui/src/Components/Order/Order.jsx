@@ -1,13 +1,31 @@
 import React, { Component } from 'react';
 import "../../Styles/index.css";
 import { Collapse } from "reactstrap";
+const cameraURL = "http://localhost:3002";
 
 export default class Order extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            cameras: [],
             collapse: false
         }
+    }
+
+    componentDidMount() {
+        this.timer = setInterval(() => this.fetchCameras(), 2000);
+    }
+
+    fetchCameras() {
+        fetch(cameraURL + "/cameras", { method: "GET" })
+            .then(res => res.json())
+            .then(res => {
+                this.setState({ cameras: res.cameras })
+            })
+            .catch(err => {
+                console.error(err);
+                // TODO announce error on uI
+            });
     }
 
     render() {
@@ -21,6 +39,7 @@ export default class Order extends Component {
                     <OrderRequester requester={this.props.order.requester} />
                     <OrderPrinter printer={this.props.order.printer} />
                     <OrderModel model={this.props.order.model} />
+                    <OrderCameras cameras={this.state.cameras} />
                     <OrderHistory history={this.props.order.history} />
                 </Collapse>
                 <div className="card-footer btn-group" role="group">
@@ -29,6 +48,42 @@ export default class Order extends Component {
                     <button type="button" className="btn btn-secondary">Pause</button>
                     <button type="button" className="btn btn-dark">Cancel</button>
                     <button type="button" className="btn btn-secondary">Finish</button>
+                </div>
+            </div>
+        );
+    }
+}
+
+class OrderCameras extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedCamera: null
+        }
+    }
+
+    updateSelectedCamera(camera, event) {
+        this.setState({ selectedCamera: camera });
+    }
+
+    render() {
+        const cameras = this.props.cameras;
+        return (
+            <div className="OrderCameras">
+                <h4>Visualiser</h4>
+                <div className="dropdown">
+                    <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {this.state.selectedCamera ? this.state.selectedCamera.reference : "Choisir la camera"}
+                    </button>
+                    <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {cameras.map((camera, key) => {
+                            return (
+                                <button key={camera._id} className="OrderCameras dropdown-item" onClick={this.updateSelectedCamera.bind(this, camera)}>
+                                    {camera.reference}
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         );
