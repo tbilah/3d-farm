@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const config = require('../../../config.json').magasin;
+const config = require('../../../config.json');
 
 const Printer = require('../models/printer');
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 
 const requestsTemplate = {
-    get: "curl -X GET " + config.domain + ":" + config.port + "/printers/$ID",
-    delete: "curl -X DELETE " + config.domain + ":" + config.port + "/printers/$ID"
+    get: "curl -X GET " + magasinURL + "/printers/$ID",
+    delete: "curl -X DELETE " + magasinURL + "/printers/$ID"
 }
 
 router.get('/', (req, res, next) => {
@@ -37,6 +37,31 @@ router.get('/', (req, res, next) => {
             res.status(500).json({
                 error: err
             });
+        });
+});
+
+router.get('/:id', (req, res, next) => {
+    Printer.findOne({
+            _id: req.params.id
+        })
+        .exec()
+        .then(prt => {
+            if (prt) {
+                let printer = {
+                    id: prt._id,
+                    brand: prt.brand,
+                    price: prt.price,
+                    state: prt.state,
+                };
+                res.status(200).json(printer);
+            } else {
+                res.status(404).json({
+                    message: 'There is no printer with the provided id'
+                });
+            }
+        })
+        .catch(error => {
+            next(error);
         });
 });
 
@@ -86,29 +111,6 @@ router.post('/', (req, res) => {
         firmware: req.body.firmware
     }
      */
-});
-
-router.get('/:printerId', (req, res) => {
-    Printer.findById(req.params.printerId).exec()
-        .then(printer => {
-            if (printer) {
-            res.status(201).json({
-                message: "Printer details!",
-                printer: printer
-            });
-            } else {
-                res.status(404).json({
-                    message: "Printer not found"
-                });
-            }
-        })
-        .catch(err => {
-            logError(err);
-            res.status(500).json({
-                message: "Internal error",
-                error: err
-            });
-        });
 });
 
 router.delete('/:printerId', (req, res) => {
