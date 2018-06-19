@@ -60,7 +60,7 @@ router.get('/:id', (req, res, next) => {
                 };
 
                 Picture.find({
-                        cameraId: cam._id
+                        camera: cam._id
                     })
                     .exec()
                     .then(pics => {

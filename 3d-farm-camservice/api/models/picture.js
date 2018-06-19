@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const pictureSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    cameraId: {
+    camera: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Camera',
         required: true
