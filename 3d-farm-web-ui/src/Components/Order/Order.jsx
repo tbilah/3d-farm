@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 import "../../Styles/index.css";
 import { Collapse, Alert } from "reactstrap";
 const printeryURL = "http://localhost:3010";
+const cameraURL = "http://localhost:3002";
 
 export default class Order extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            cameras: [],
             collapse: false,
             message: "",
             state: "idle", // idle, request, success, fail
@@ -70,6 +72,22 @@ export default class Order extends Component {
         }
     }
 
+    componentDidMount() {
+        this.timer = setInterval(() => this.fetchCameras(), 2000);
+    }
+
+    fetchCameras() {
+        fetch(cameraURL + "/cameras", { method: "GET" })
+            .then(res => res.json())
+            .then(res => {
+                this.setState({ cameras: res.cameras })
+            })
+            .catch(err => {
+                console.error(err);
+                // TODO announce error on uI
+            });
+    }
+
     render() {
         return (
             <div className="card Order">
@@ -81,6 +99,7 @@ export default class Order extends Component {
                     <OrderRequester requester={this.props.order.requester} />
                     <OrderPrinter printer={this.props.order.printer} />
                     <OrderModel model={this.props.order.model} />
+                    <OrderCameras cameras={this.state.cameras} />
                     <OrderHistory history={this.props.order.history} />
                 </Collapse>
                 <div className="card-footer btn-group" role="group">
@@ -92,6 +111,42 @@ export default class Order extends Component {
                 </div>
                 <Alert style={{ display: this.state.state === "idle" ? "none" : "block" }} className="card-text"
                     color={this._getAlertColor()}>{this.state.message}</Alert>
+            </div>
+        );
+    }
+}
+
+class OrderCameras extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedCamera: null
+        }
+    }
+
+    updateSelectedCamera(camera, event) {
+        this.setState({ selectedCamera: camera });
+    }
+
+    render() {
+        const cameras = this.props.cameras;
+        return (
+            <div className="OrderCameras">
+                <h4>Visualiser</h4>
+                <div className="dropdown">
+                    <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {this.state.selectedCamera ? this.state.selectedCamera.reference : "Choisir la camera"}
+                    </button>
+                    <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        {cameras.map((camera, key) => {
+                            return (
+                                <button key={camera._id} className="OrderCameras dropdown-item" onClick={this.updateSelectedCamera.bind(this, camera)}>
+                                    {camera.reference}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
             </div>
         );
     }

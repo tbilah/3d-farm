@@ -1,36 +1,67 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const Printer = require('../models/printer');
 const config = require('../../../config.json');
-const logError = require('../../../3d-farm-logging/logging');
+
+const Printer = require('../models/printer');
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 
-router.get('/', (req, res) => {
-    Printer.find().exec()
+const requestsTemplate = {
+    get: "curl -X GET " + magasinURL + "/printers/$ID",
+    delete: "curl -X DELETE " + magasinURL + "/printers/$ID"
+}
+
+router.get('/', (req, res, next) => {
+    Printer.find()
+        .exec()
         .then(printers => {
-            if (Array.isArray(printers) && printers.length > 0) {
-                res.status(200).json({
-                    message: 'List of printers',
-                    printers: printers.map(p => {
-                        p.request = {
-                            type: "GET",
-                            url: magasinURL + "/printers/" + p._id
-                        };
-                        return p;
-                    })
-                });
-            } else {
-                res.status(404).json({
-                    message: "No printer found"
+            const response = {
+                count: printers.length,
+                printers: printers.map(printer => {
+                    return {
+                        _id: printer._id,
+                        brand: printer.brand,
+                        price: printer.price,
+                        state: printer.state,
+                        requests: {
+                            get: requestsTemplate.get.replace(/\$ID/, printer._id),
+                            delete: requestsTemplate.delete.replace(/\$ID/, printer._id)
+                        }
+                    }
                 })
-            }
+            };
+            res.status(200).json(response);
         })
         .catch(err => {
-            logError(err);
+            console.error(err);
             res.status(500).json({
-                message: "Internal error. " + err
+                error: err
             });
+        });
+});
+
+router.get('/:id', (req, res, next) => {
+    Printer.findOne({
+            _id: req.params.id
+        })
+        .exec()
+        .then(prt => {
+            if (prt) {
+                let printer = {
+                    id: prt._id,
+                    brand: prt.brand,
+                    price: prt.price,
+                    state: prt.state,
+                };
+                res.status(200).json(printer);
+            } else {
+                res.status(404).json({
+                    message: 'There is no printer with the provided id'
+                });
+            }
+        })
+        .catch(error => {
+            next(error);
         });
 });
 
@@ -80,29 +111,6 @@ router.post('/', (req, res) => {
         firmware: req.body.firmware
     }
      */
-});
-
-router.get('/:printerId', (req, res) => {
-    Printer.findById(req.params.printerId).exec()
-        .then(printer => {
-            if (printer) {
-                res.status(201).json({
-                    message: "Printer details!",
-                    printer: printer
-                });
-            } else {
-                res.status(404).json({
-                    message: "Printer not found"
-                });
-            }
-        })
-        .catch(err => {
-            logError(err);
-            res.status(500).json({
-                message: "Internal error",
-                error: err
-            });
-        });
 });
 
 router.delete('/:printerId', (req, res) => {

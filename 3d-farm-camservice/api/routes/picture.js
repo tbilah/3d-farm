@@ -49,7 +49,7 @@ router.get('/', (req, res, next) => {
                 pictures: pictures.map(pic => {
                     return {
                         _id: pic._id,
-                        cameraId: pic.cameraId,
+                        camera: pic.camera,
                         timestamp: pic.timestamp,
                         image: pic.image,
                         requests: {
@@ -73,13 +73,13 @@ router.get('/:id', (req, res, next) => {
     Picture.findOne({
             _id: req.params.id
         })
-        .populate('cameraId')
+        .populate('camera')
         .exec()
         .then(pic => {
             if (pic) {
                 res.status(200).json({
                     id: pic._id,
-                    cameraId: pic.cameraId,
+                    camera: pic.camera,
                     timestamp: pic.timestamp,
                     image: pic.image,
                     requests: {
@@ -101,34 +101,33 @@ router.get('/:id', (req, res, next) => {
 });
 
 router.post('/', upload.single('image'), (req, res, next) => {
-    console.log(req.file);
     Camera.findOne({
-            _id: req.body.cameraId
+            _id: req.body.camera
         })
         .then(camera => {
             if (!camera) {
                 res.status(404).json({
-                    message: 'The camera Id is invalid (camera doesn\'t exist)',
+                    message: 'The provided camera Id does not correspond to any camera in the database',
                 });
             }
             const picture = new Picture({
                 _id: mongoose.Types.ObjectId(),
-                cameraId: camera._id,
-                timestamp: req.body.timestamp,
+                camera: camera._id,
                 image: req.file.path
             })
-            picture.save();
-            return res.status(201).json({
-                message: "Picture created successfully",
-                picture: {
-                    _id: picture._id,
-                    reference: picture.reference,
-                    image: picture.image,
-                    requests: {
-                        get: requestsTemplate.get.replace(/\$ID/, picture._id),
-                        delete: requestsTemplate.delete.replace(/\$ID/, picture._id)
+            picture.save().then(pic => {
+                res.status(201).json({
+                    message: "Picture created successfully",
+                    picture: {
+                        _id: picture._id,
+                        timestamp: picture.timestamp,
+                        image: picture.image,
+                        requests: {
+                            get: requestsTemplate.get.replace(/\$ID/, picture._id),
+                            delete: requestsTemplate.delete.replace(/\$ID/, picture._id)
+                        }
                     }
-                }
+                })
             });
         })
         .catch(err => {

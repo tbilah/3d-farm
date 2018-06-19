@@ -24,14 +24,4 @@ const staffSchema = mongoose.Schema({
     }
 });
 
-/**
-{
-    "name": "Abdelilah KHLIL",
-    "email": "khlil.abdelilah@gmail.com",
-    "phone": "0782823308",
-    "type": "CHEF",
-    "departement": "toy departement"
-}
- */
-
 module.exports = mongoose.model('Staff', staffSchema);
