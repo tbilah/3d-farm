@@ -9,6 +9,11 @@ const magasinURL = config.magasin.domain + ":" + config.magasin.port;
 
 const visibleFields = '_id name email phone type departement';
 
+const requestsTemplate = {
+    get: "curl -X GET " + magasinURL + "/staff/$ID",
+    delete: "curl -X DELETE " + magasinURL + "/staff/$ID"
+}
+
 router.get('/', (req, res, next) => {
     Staff.find()
         .select(visibleFields)
@@ -24,9 +29,9 @@ router.get('/', (req, res, next) => {
                         phone: user.phone,
                         type: user.type,
                         departement: user.departement,
-                        request: {
-                            type: 'GET',
-                            url: magasinURL + "/staff/" + user._id
+                        requests: {
+                            get: requestsTemplate.get.replace(/\$ID/, user._id),
+                            delete: requestsTemplate.delete.replace(/\$ID/, user._id)
                         }
                     }
                 })
@@ -44,8 +49,8 @@ router.get('/', (req, res, next) => {
 
 router.get('/:id', (req, res, next) => {
     Staff.findOne({
-        _id: req.params.id
-    })
+            _id: req.params.id
+        })
         .select(visibleFields)
         .exec()
         .then(user => {
@@ -76,22 +81,22 @@ router.post('/', (req, res, next) => {
         departement: req.body.departement
     })
     staff.save().then(user => {
-        res.status(201).json({
-            message: "User created successfully",
-            createdStaff: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                phone: user.phone,
-                type: user.type,
-                departement: user.departement,
-                request: {
-                    type: 'GET',
-                    url: magasinURL + "/staff/" + user._id
+            res.status(201).json({
+                message: "User created successfully",
+                createdStaff: {
+                    _id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone,
+                    type: user.type,
+                    departement: user.departement,
+                    request: {
+                        type: 'GET',
+                        url: magasinURL + "/staff/" + user._id
+                    }
                 }
-            }
-        });
-    })
+            });
+        })
         .catch(err => {
             logError(err);
             res.status(500).json({
@@ -107,8 +112,8 @@ router.patch('/:id', (req, res, next) => {
         updateOps[ops.propName] = ops.value;
     }
     Staff.findOneAndUpdate({
-        _id: id
-    }, {
+            _id: id
+        }, {
             $set: updateOps
         })
         .exec()
@@ -134,8 +139,8 @@ router.patch('/:id', (req, res, next) => {
 router.delete('/:id', (req, res, next) => {
     const id = req.params.id;
     Staff.findOneAndRemove({
-        _id: id
-    })
+            _id: id
+        })
         .exec()
         .then(user => {
             if (!user) {
