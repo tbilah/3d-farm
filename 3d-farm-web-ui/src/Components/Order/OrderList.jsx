@@ -45,7 +45,8 @@ export default class OrderList extends Component {
             <div className="container">
                 <OrderCreator printers={this.state.printers} onSuccess={this.fetchAll.bind(this)} />
                 {this.state.orders.map(o =>
-                    <Order order={o} key={o._id} printers={this.state.printers} users={this.state.users} />
+                    <Order order={o} key={o._id} printers={this.state.printers} users={this.state.users}
+                        onSuccess={this.fetchAll.bind(this)} />
                 )}
             </div>
         );

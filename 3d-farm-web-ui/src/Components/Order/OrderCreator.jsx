@@ -31,7 +31,6 @@ export default class OrderCreator extends Component {
         })
             .then(res => res.json())
             .then(res => this.setState({ message: res.message + ". id=" + res.order._id, state: "success" }))
-            .then(console.log)
             .then(_ => this.props.onSuccess())
             .catch(err => {
                 console.error(err);
