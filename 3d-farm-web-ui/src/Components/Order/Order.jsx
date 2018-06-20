@@ -1,18 +1,24 @@
 import React, { Component } from 'react';
 import "../../Styles/index.css";
-import { Collapse, Alert } from "reactstrap";
+import {
+    Collapse,
+    Alert,
+    UncontrolledCarousel,
+    ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem
+} from "reactstrap";
 const printeryURL = "http://localhost:3010";
-const cameraURL = "http://localhost:3002";
+const camServiceURL = "http://localhost:3002";
 
 export default class Order extends Component {
     constructor(props) {
         super(props);
         this.state = {
             cameras: [],
+            pictures: [],
             collapse: false,
             message: "",
             state: "idle", // idle, request, success, fail
-            user: JSON.parse(sessionStorage.getItem("user")).magasin 
+            user: JSON.parse(sessionStorage.getItem("user")).magasin
         }
     }
 
@@ -77,7 +83,7 @@ export default class Order extends Component {
     }
 
     fetchCameras() {
-        fetch(cameraURL + "/cameras", { method: "GET" })
+        fetch(camServiceURL + "/cameras", { method: "GET" })
             .then(res => res.json())
             .then(res => {
                 this.setState({ cameras: res.cameras })
@@ -119,35 +125,94 @@ export default class Order extends Component {
 class OrderCameras extends Component {
     constructor(props) {
         super(props);
+
+        this.toggle = this.toggle.bind(this);
         this.state = {
-            selectedCamera: null
-        }
+            dropdownOpen: false
+        };
     }
 
-    updateSelectedCamera(camera, event) {
-        this.setState({ selectedCamera: camera });
+    toggle() {
+        this.setState({
+            dropdownOpen: !this.state.dropdownOpen
+        });
+    }
+
+    _updateSelectedCamera(camera, event) {
+        sessionStorage.setItem('selectedCamera', JSON.stringify(camera));
     }
 
     render() {
         const cameras = this.props.cameras;
+        const selectedCamera = JSON.parse(sessionStorage.getItem("selectedCamera"));
         return (
             <div className="OrderCameras">
-                <h4>Visualiser</h4>
-                <div className="dropdown">
-                    <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {this.state.selectedCamera ? this.state.selectedCamera.reference : "Choisir la camera"}
-                    </button>
-                    <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <b>Cameras :</b>
+                <ButtonDropdown isOpen={this.state.dropdownOpen} toggle={this.toggle}>
+                    <DropdownToggle caret>
+                        {selectedCamera ? selectedCamera.reference : "Choisir la camera"}
+                    </DropdownToggle>
+                    <DropdownMenu>
                         {cameras.map((camera, key) => {
                             return (
-                                <button key={camera._id} className="OrderCameras dropdown-item" onClick={this.updateSelectedCamera.bind(this, camera)}>
+                                <DropdownItem
+                                    key={camera._id}
+                                    onClick={this._updateSelectedCamera.bind(this, camera)}
+                                >
                                     {camera.reference}
-                                </button>
+                                </DropdownItem>
                             );
                         })}
-                    </div>
-                </div>
+                    </DropdownMenu>
+                </ButtonDropdown>
+                <br />
+                <OrderPictures />
+                <br />
             </div>
+        );
+    }
+}
+
+class OrderPictures extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            pictures: []
+        };
+    }
+
+    componentDidMount() {
+        this.timer = setInterval(() => this.fetchPictures(), 2000);
+    }
+
+    fetchPictures() {
+        fetch(camServiceURL + "/pictures", { method: "GET" })
+            .then(res => res.json())
+            .then(res => {
+                this.setState({ pictures: res.pictures })
+            })
+            .catch(err => {
+                console.error(err);
+                // TODO announce error on uI
+            });
+    }
+
+    render() {
+        const pictures = this.state.pictures;
+        const items = [];
+
+        pictures.map(pic => {
+            const url = camServiceURL + "/" + pic.image;
+            items.push({
+                src: url,
+                altText: 'image',
+                caption: pic.timestamp,
+                header: "Timestamp"
+            })
+        });
+
+        return (
+            <UncontrolledCarousel items={items} />
         );
     }
 }

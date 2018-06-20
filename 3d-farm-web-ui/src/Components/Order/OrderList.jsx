@@ -29,7 +29,6 @@ export default class OrderList extends Component {
     fetchAll() {
         Promise.all([this.fetchOrders(), this.fetchPrinters(), this.fetchUsers()])
             .then(ar => {
-                console.log(ar);
                 return ar;
             })
             .then(ar => this.setState({ orders: ar[0], printers: ar[1].printers, users: ar[2].users, hiddenOrders: [] }))
@@ -54,7 +53,6 @@ export default class OrderList extends Component {
 
     shouldShow(order) {
         if (!this.state.filter) return true;
-        console.log(order.state, this.state.filter, this.state.filter.indexOf(order.state));
         return this.state.filter.indexOf(order.state) >= 0;
     }
 
