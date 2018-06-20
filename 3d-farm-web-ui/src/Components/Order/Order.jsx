@@ -6,8 +6,10 @@ import {
     UncontrolledCarousel,
     ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem
 } from "reactstrap";
+
 const printeryURL = "http://localhost:3010";
 const camServiceURL = "http://localhost:3002";
+const updateRate = 10000;
 
 export default class Order extends Component {
     constructor(props) {
@@ -79,7 +81,7 @@ export default class Order extends Component {
     }
 
     componentDidMount() {
-        this.timer = setInterval(() => this.fetchCameras(), 2000);
+        this.timer = setInterval(() => this.fetchCameras(), updateRate);
     }
 
     fetchCameras() {
@@ -166,6 +168,7 @@ class OrderCameras extends Component {
                     </DropdownMenu>
                 </ButtonDropdown>
                 <br />
+                <br />
                 <OrderPictures />
                 <br />
             </div>
@@ -182,7 +185,8 @@ class OrderPictures extends Component {
     }
 
     componentDidMount() {
-        this.timer = setInterval(() => this.fetchPictures(), 2000);
+        this.fetchPictures();
+        this.timer = setInterval(() => this.fetchPictures(), updateRate);
     }
 
     fetchPictures() {
