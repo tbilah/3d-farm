@@ -104,11 +104,11 @@ export default class Order extends Component {
                 </div>
                 <Collapse className="card-body" isOpen={this.state.collapse}>
                     <OrderState state={this.props.order.state} />
-                    <OrderRequester requester={this.props.order.requester} />
+                    <OrderRequester requester={this.props.order.requester} userList={this.props.users} />
                     <OrderPrinter printer={this.props.order.printer} />
                     <OrderModel model={this.props.order.model} />
                     <OrderCameras cameras={this.state.cameras} />
-                    <OrderHistory history={this.props.order.history} />
+                    <OrderHistory history={this.props.order.history} userList={this.props.users} />
                 </Collapse>
                 <div className="card-footer btn-group" role="group">
                     <button type="button" className="btn btn-secondary" onClick={this._accept.bind(this)}>Accept</button>
@@ -205,7 +205,7 @@ class OrderPictures extends Component {
         const pictures = this.state.pictures;
         const items = [];
 
-        pictures.map(pic => {
+        pictures.forEach(pic => {
             const url = camServiceURL + "/" + pic.image;
             items.push({
                 src: url,
@@ -235,7 +235,7 @@ class OrderState extends Component {
     render() {
         return (
             <p className="OrderState card-text">
-                <b>State:</b>
+                <b>State:&nbsp;</b>
                 {this.props.state}
             </p>
         );
@@ -244,10 +244,11 @@ class OrderState extends Component {
 
 class OrderRequester extends Component {
     render() {
+        let requester = getUser(this.props.requester, this.props.userList);
         return (
             <p className="OrderRequester card-text">
-                <b>Requester:</b>
-                {this.props.requester}
+                <b>Requester:&nbsp;</b>
+                {requester.name}
             </p>
         );
     }
@@ -278,6 +279,7 @@ class OrderModel extends Component {
 
 class OrderHistory extends Component {
     render() {
+        this.props.history.forEach(e => e.emitter = getUser(e.emittorId, this.props.userList));
         return (
             <div className="OrderHistory card-text">
                 <b>Journal:</b>
@@ -292,7 +294,7 @@ class OrderHistory extends Component {
 class OrderEvent extends Component {
     render() {
         const date = new Date(this.props.event.date);
-        const emitter = this.props.event.emittorId;
+        const emitter = this.props.event.emitter.name;
         const description = this.props.event.description;
         return (
             <li className="OrderEvent card-text">
@@ -300,4 +302,12 @@ class OrderEvent extends Component {
             </li>
         )
     }
+}
+
+function getUser(id, userList) {
+    let user = userList.find(u => u._id === id);
+    if (!user) {
+        console.error("Unknow user", user, "in user list", userList);
+    }
+    return user;
 }
