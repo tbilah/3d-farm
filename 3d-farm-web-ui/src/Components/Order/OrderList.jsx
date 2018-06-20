@@ -29,9 +29,14 @@ export default class OrderList extends Component {
     fetchAll() {
         Promise.all([this.fetchOrders(), this.fetchPrinters(), this.fetchUsers()])
             .then(ar => {
-                return ar;
+                if (ar[0].status === 404) // No order
+                    ar[0] = []; // Reset
+                if (!ar[1].printers)
+                    ar[1].printers = [];
+                if (!ar[2].users)
+                    ar[2].users = [];
+                this.setState({ orders: ar[0], printers: ar[1].printers, users: ar[2].users });
             })
-            .then(ar => this.setState({ orders: ar[0], printers: ar[1].printers, users: ar[2].users, hiddenOrders: [] }))
             .catch(console.error);
     }
 

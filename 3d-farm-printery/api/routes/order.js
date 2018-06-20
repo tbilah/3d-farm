@@ -6,7 +6,6 @@ const agent = require("superagent");
 const config = require("../../../config.json");
 const FarmError = require("../errors/FarmError");
 const CustomErrors = require("../errors/CustomErrors");
-const logError = require('../../../3d-farm-logging/logging');
 const notificationURL = config.notification.domain + ":" + config.notification.port;
 const printeryURL = config.printery.domain + ":" + config.printery.port;
 const magasinURL = config.magasin.domain + ":" + config.magasin.port;
@@ -16,12 +15,12 @@ const magasinURL = config.magasin.domain + ":" + config.magasin.port;
  * @returns {Promise} 
  */
 function validateStaff(req) {
-    console.log(req.body);
     if (!mongoose.Types.ObjectId.isValid(req.body.requester)) {
         throw new CustomErrors.InvalidStaffIdError();
     }
     return agent.get(magasinURL + "/staff/" + req.body.requester)
         .then(res => {
+            console.log("Staff:" + JSON.stringify(res.body, null, 4));
             if (res.ok) return res.body;
         })
         .catch(err => {
@@ -47,8 +46,9 @@ function validatePrinter(req) {
     }
     return agent.get(magasinURL + "/printers/" + req.body.printer)
         .then(res => {
+            console.log("Printer:" + JSON.stringify(res.body, null, 4));
             if (res.ok) {
-                let printer = res.body.printer;
+                let printer = res.body;
                 if (printer.state === "DOWN") {
                     throw new CustomErrors.UnavailablePrinterError(printer);
                 }
@@ -61,7 +61,7 @@ function validatePrinter(req) {
                     throw new CustomErrors.InexistingPrinterError();
                     break;
                 default:
-                    throw new FarmError(err.body.message, err.status);
+                    throw new FarmError(err, err.status);
                     break;
             }
         });
@@ -125,6 +125,7 @@ function getConcerningPeopleIds(order, event) {
  * @returns {Promise}
  */
 function createNewOrder(req) {
+    console.log("Req body", req.body);
     return Order.create({
         _id: mongoose.Types.ObjectId(),
         requester: req.body.requester,
@@ -134,7 +135,8 @@ function createNewOrder(req) {
         .then(order => {
             console.log("New order created:", order);
             return order;
-        });
+        })
+        .catch(console.error);
 }
 
 /**
@@ -235,7 +237,7 @@ router.post("/", (req, res) => {
             order: order
         }))
         .catch(err => {
-            logError(err);
+            console.error(err);
             if (err instanceof FarmError) {
                 return res.status(err.status).json(err);
             } else {
